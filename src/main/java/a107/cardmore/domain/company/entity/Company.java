@@ -49,17 +49,17 @@ public class Company {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean isSelected = false;
+    private boolean isSelected = false;
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean isDeleted = false;
+    private boolean isDeleted = false;
 
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Card> cards = new ArrayList<>();
 
-    public void changeIsSelected(Boolean isSelected) {
+    public void changeIsSelected(boolean isSelected) {
         this.isSelected = isSelected;
     }
 }

@@ -19,14 +19,14 @@ public class CompanyCardListResponseDto {
     private Long companyId;
     private String companyNo;
     private String companyName;
-    private Boolean isSelected;
+    private boolean isSelected;
     private List<CardResponseDto> cards = new ArrayList<>();
 
     public void addCards(Company company, List<Card> userCompanyCards, List<CardProductResponseRestTemplateDto> cardInfos) {
         this.companyId = company.getId();
         this.companyName = company.getName();
         this.companyNo = company.getCompanyNo();
-        this.isSelected = company.getIsSelected();
+        this.isSelected = company.isSelected();
 
         for(Card userCard : userCompanyCards) {
             CardProductResponseRestTemplateDto cardProduct = cardInfos.stream().filter(card -> card.getCardUniqueNo().equals(userCard.getCardUniqueNo()))

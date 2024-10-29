@@ -67,11 +67,11 @@ public class Card {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean isSelected = false;
+    private boolean isSelected = false;
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean isDeleted = false;
+    private boolean isDeleted = false;
 
     @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

@@ -29,7 +29,7 @@ public class CardResponseDto {
     private String cardDescription;
     private String colorBackground;
     private String colorTitle;
-    private Boolean isSelected;
+    private boolean isSelected;
     private Long limitRemaining;
     private Long performanceRemaining;
     private List<CardBenefitResponseDto> cardBenefits = new ArrayList<>();
@@ -46,7 +46,7 @@ public class CardResponseDto {
         this.cardDescription = cardProduct.getCardDescription();
         this.colorBackground = card.getColorBackground();
         this.colorTitle = card.getColorTitle();
-        this.isSelected = card.getIsSelected();
+        this.isSelected = card.isSelected();
         this.limitRemaining = card.getLimitRemaining();
         this.performanceRemaining = card.getPerformanceRemaining();
         cardProduct.getCardBenefitsInfo().forEach(benefitsInfo ->

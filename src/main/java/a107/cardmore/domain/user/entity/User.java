@@ -48,7 +48,7 @@ public class User {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean isDeleted = false;
+    private boolean isDeleted = false;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

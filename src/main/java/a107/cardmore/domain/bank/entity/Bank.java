@@ -30,5 +30,5 @@ public class Bank {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean isDeleted = false;
+    private boolean isDeleted = false;
 }
