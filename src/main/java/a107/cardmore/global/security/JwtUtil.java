@@ -5,6 +5,7 @@ import a107.cardmore.domain.auth.dto.JwtToken;
 import a107.cardmore.domain.redis.BlacklistTokenRedisRepository;
 import a107.cardmore.domain.redis.RefreshTokenRedisRepository;
 import a107.cardmore.domain.user.entity.User;
+import a107.cardmore.global.exception.BadRequestException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -49,7 +50,7 @@ public class JwtUtil {
         boolean isBlacked = blacklistTokenRedisRepository.hasKey(token);
 
         if (isBlacked) {
-            throw new RuntimeException();
+            throw new BadRequestException("유효하지 않은 토큰입니다.");
         }
     }
     public String generateAccessToken(User user){
@@ -112,13 +113,13 @@ public class JwtUtil {
 
     private void checkType(Claims claims, String type) {
         if (!type.equals(String.valueOf(claims.get("type")))) {
-            throw new RuntimeException(); //NotMatchedTokenTypeException
+            throw new BadRequestException("유효하지 않은 토큰입니다.");
         }
     }
 
     public String findRefreshTokenByAccessToken(String accessToken) {
         return refreshTokenRedisRepository.findById(accessToken)
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(() -> new BadRequestException("유효하지 않은 토큰입니다."));
     }
 
 }

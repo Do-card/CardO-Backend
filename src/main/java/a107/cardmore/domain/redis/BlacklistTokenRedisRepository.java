@@ -1,5 +1,6 @@
 package a107.cardmore.domain.redis;
 
+import a107.cardmore.global.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class BlacklistTokenRedisRepository extends BaseRedisRepository<String> {
         Boolean hasKey = redisTemplate.hasKey(prefix + token);
 
         if (hasKey == null){
-            throw new RuntimeException();
+            throw new BadRequestException("Token not found");
         }
         return hasKey;
     }
