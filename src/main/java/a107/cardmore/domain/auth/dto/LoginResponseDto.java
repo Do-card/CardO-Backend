@@ -1,16 +1,15 @@
 package a107.cardmore.domain.auth.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Getter
-@ToString
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DecodedJwtToken {
-    private Long userId;
-    private String role;
-    private String type;
+public class LoginResponseDto {
+    private String accessToken;
+    private String refreshToken;
 }

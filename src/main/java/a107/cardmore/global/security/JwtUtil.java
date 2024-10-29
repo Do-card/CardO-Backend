@@ -1,7 +1,6 @@
 package a107.cardmore.global.security;
 
 import a107.cardmore.domain.auth.dto.DecodedJwtToken;
-import a107.cardmore.domain.auth.dto.JwtToken;
 import a107.cardmore.domain.redis.BlacklistTokenRedisRepository;
 import a107.cardmore.domain.redis.RefreshTokenRedisRepository;
 import a107.cardmore.domain.user.entity.User;
@@ -65,10 +64,6 @@ public class JwtUtil {
         refreshTokenRedisRepository.save(accessToken, refreshToken);
     }
 
-    public void saveRefreshToken(JwtToken jwtToken){
-        saveRefreshToken(jwtToken.getAccessToken(), jwtToken.getRefreshToken());
-    }
-
     public void renewRefreshToken(String oldAccessToken, String newAccessToken, String newRefreshToken){
         refreshTokenRedisRepository.save(newAccessToken, newRefreshToken);
         expireToken(oldAccessToken);
@@ -76,6 +71,7 @@ public class JwtUtil {
 
     private String issueToken(Long userId, String role, String type, Long time) {
         Date now = new Date();
+        Date expiration = new Date(now.getTime() + time * 1000);
         return Jwts.builder()
                 .issuer("Card-O! Inc.")
                 .signWith(getSecretKey())
@@ -83,7 +79,7 @@ public class JwtUtil {
                 .claim("type", type)
                 .claim("role", role)
                 .issuedAt(now)
-                .expiration(new Date(now.getTime() + time))
+                .expiration(expiration)
                 .compact();
     }
 
