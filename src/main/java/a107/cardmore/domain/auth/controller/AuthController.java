@@ -3,7 +3,6 @@ package a107.cardmore.domain.auth.controller;
 import a107.cardmore.domain.auth.dto.RegisterRequestDto;
 import a107.cardmore.domain.auth.dto.RegisterResponseDto;
 import a107.cardmore.domain.auth.service.AuthService;
-import a107.cardmore.domain.user.service.UserService;
 import a107.cardmore.util.base.BaseSuccessResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

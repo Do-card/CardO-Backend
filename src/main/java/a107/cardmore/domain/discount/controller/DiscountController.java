@@ -1,6 +1,5 @@
 package a107.cardmore.domain.discount.controller;
 
-import a107.cardmore.domain.discount.dto.DiscountDetailDto;
 import a107.cardmore.domain.discount.dto.DiscountDto;
 import a107.cardmore.domain.discount.service.DiscountService;
 import a107.cardmore.util.base.BaseSuccessResponse;
@@ -11,8 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/discounts")
