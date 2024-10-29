@@ -24,8 +24,3 @@ fintech:
     no: ${FINTECH_API_NO}
   institution:
     code: ${FINTECH_INSTITUTION_CODE}
-
-logging:
-  level:
-    a107.cardmore: debug
-    com.consoltant.consoltant.global.security: INFO
