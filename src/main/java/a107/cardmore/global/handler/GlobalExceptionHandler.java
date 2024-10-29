@@ -1,4 +1,4 @@
-package a107.cardmore.global.error;
+package a107.cardmore.global.handler;
 
 import a107.cardmore.global.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;

@@ -10,6 +10,12 @@ spring:
     url: ${DATASOURCE_URL}
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
+  data:
+    redis:
+      password: ${REDIS_PASSWORD}
+      cluster:
+        nodes: ${REDIS_NODES}
+        max-redirects: 6
 
 jwt:
   secret-key: ${SECRET_KEY}
@@ -28,4 +34,3 @@ fintech:
 logging:
   level:
     a107.cardmore: debug
-    com.consoltant.consoltant.global.security: INFO
