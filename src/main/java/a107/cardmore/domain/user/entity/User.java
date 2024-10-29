@@ -3,6 +3,7 @@ package a107.cardmore.domain.user.entity;
 import a107.cardmore.domain.company.entity.Company;
 import a107.cardmore.domain.item.entity.Item;
 import a107.cardmore.domain.marker.entity.Marker;
+import a107.cardmore.util.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLRestriction("is_deleted = false")
 @Table(name = "user")
 @ToString
-public class User {
+public class User extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

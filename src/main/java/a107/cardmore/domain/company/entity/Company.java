@@ -3,6 +3,7 @@ package a107.cardmore.domain.company.entity;
 import a107.cardmore.domain.card.entity.Card;
 import a107.cardmore.domain.item.entity.Item;
 import a107.cardmore.domain.user.entity.User;
+import a107.cardmore.util.base.BaseTimeEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,7 +32,7 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLDelete(sql = "UPDATE company SET is_deleted = true WHERE id = ?")
 @SQLRestriction("is_deleted = false")
 @Table(name = "company")
-public class Company {
+public class Company extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
