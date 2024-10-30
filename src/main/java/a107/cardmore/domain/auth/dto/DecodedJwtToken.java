@@ -10,7 +10,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DecodedJwtToken {
-    private Long userId;
+    private String email;
     private String role;
     private String type;
 }
