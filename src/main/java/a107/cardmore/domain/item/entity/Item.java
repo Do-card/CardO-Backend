@@ -50,10 +50,10 @@ public class Item extends BaseTimeEntity {
     private String category;
 
     @Column(name = "is_done", nullable = false)
-    private Boolean isDone = false;
+    private boolean isDone = false;
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean isDeleted = false;
+    private boolean isDeleted = false;
 
 }

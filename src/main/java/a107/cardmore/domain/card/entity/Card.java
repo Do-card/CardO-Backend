@@ -78,7 +78,7 @@ public class Card extends BaseTimeEntity {
     @Builder.Default
     private List<Discount> discounts = new ArrayList<>();
 
-    public void changeIsSelected(Boolean isSelected) {
+    public void changeIsSelected(boolean isSelected) {
         this.isSelected = isSelected;
     }
 

@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BankModuleService {
     private final BankRepository bankRepository;
 
-    public Boolean checkUser(String email){
+    public boolean checkUser(String email){
         return bankRepository.findByEmail(email).isPresent();
     }
 
