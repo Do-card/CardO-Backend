@@ -1,4 +1,4 @@
-package a107.cardmore.global.error;
+package a107.cardmore.global.handler;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

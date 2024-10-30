@@ -39,7 +39,7 @@ public class CompanyService {
 
         for (SelectedInfo selectedInfo : selectedCompanies) {
             Company company = companyModuleService.findCompany(selectedInfo.getId(), user);
-            company.changeIsSelected(selectedInfo.getIsSelected());
+            company.changeIsSelected(selectedInfo.isSelected());
         }
 
         return companyModuleService.findUserCompanies(user).stream().map(companyMapper::toCompanyInfo).toList();

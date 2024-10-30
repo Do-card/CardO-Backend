@@ -157,7 +157,7 @@ public class RecommendService {
                     .cardDescription(creditCard.getCardDescription())
                     .colorBackground(matchedCard.getColorBackground())
                     .colorTitle(matchedCard.getColorTitle())
-                    .isSelected(matchedCard.getIsSelected())
+                    .isSelected(matchedCard.isSelected())
                     .limitRemaining(matchedCard.getLimitRemaining())
                     .performanceRemaining(matchedCard.getPerformanceRemaining())
                     .cardTypeCode(creditCard.getCardTypeCode())  // 추가된 필드

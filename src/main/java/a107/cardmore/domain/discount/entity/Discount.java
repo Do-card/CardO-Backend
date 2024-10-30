@@ -2,6 +2,7 @@ package a107.cardmore.domain.discount.entity;
 
 import a107.cardmore.domain.card.entity.Card;
 import a107.cardmore.domain.user.entity.User;
+import a107.cardmore.util.base.BaseTimeEntity;
 import a107.cardmore.util.constant.MerchantCategory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,7 +31,7 @@ import java.time.LocalDate;
 @SQLDelete(sql = "UPDATE discount SET is_deleted = true WHERE id = ?")
 @SQLRestriction("is_deleted = false")
 @Table(name = "discount")
-public class Discount {
+public class Discount extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,5 +59,5 @@ public class Discount {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean isDeleted = false;
+    private boolean isDeleted = false;
 }

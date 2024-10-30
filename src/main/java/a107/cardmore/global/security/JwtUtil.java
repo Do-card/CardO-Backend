@@ -1,63 +1,121 @@
 package a107.cardmore.global.security;
 
+import a107.cardmore.domain.auth.dto.DecodedJwtToken;
+import a107.cardmore.domain.redis.BlacklistTokenRedisRepository;
+import a107.cardmore.domain.redis.RefreshTokenRedisRepository;
+import a107.cardmore.domain.user.entity.User;
+import a107.cardmore.global.exception.BadRequestException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import static a107.cardmore.util.constant.RedisPrefix.ACCESS_TOKEN;
+import static a107.cardmore.util.constant.RedisPrefix.REFRESH_TOKEN;
+
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtUtil {
 
-    private final SecretKey secretKey;
+    // TODO: Exception 처리 및 세분화
+    private final RefreshTokenRedisRepository refreshTokenRedisRepository;
+    private final BlacklistTokenRedisRepository blacklistTokenRedisRepository;
 
-    public JwtUtil(@Value("${spring.jwt.secret}") String secret){
-        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
+    @Value("${jwt.secret-key}") private String secretKey;
+    @Value("${jwt.access-token-exp}") private long accessTokenExp;
+    @Value("${jwt.refresh-token-exp}") private long refreshTokenExp;
+
+    private SecretKey getSecretKey() {
+        return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String getUsername(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
+    public Jws<Claims> getClaim(String token){
+        validateToken(token);
+        return Jwts.parser()
+                .verifyWith(getSecretKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-//        System.out.println("clame " + claims);
-        return claims.get("username", String.class);
+                .parseSignedClaims(token);
     }
 
-    public String getRole(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+    private void validateToken(String token){
+        boolean isBlacked = blacklistTokenRedisRepository.hasKey(token);
 
-        return claims.get("role", String.class);
+        if (isBlacked) {
+            throw new BadRequestException("유효하지 않은 토큰입니다.");
+        }
+    }
+    public String generateAccessToken(User user){
+        return issueToken(user.getId(), user.getRole(), ACCESS_TOKEN, accessTokenExp);
     }
 
-    public Boolean isExpired(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getExpiration().before(new Date());
+    public String generateRefreshToken(User user){
+        return issueToken(user.getId(), user.getRole(), REFRESH_TOKEN, refreshTokenExp);
     }
 
-    public String createJwt(String username, String role, Long expiredMs) {
+    public void saveRefreshToken(String accessToken, String refreshToken){
+        refreshTokenRedisRepository.save(accessToken, refreshToken);
+    }
+
+    public void renewRefreshToken(String oldAccessToken, String newAccessToken, String newRefreshToken){
+        refreshTokenRedisRepository.save(newAccessToken, newRefreshToken);
+        expireToken(oldAccessToken);
+    }
+
+    private String issueToken(Long userId, String role, String type, Long time) {
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + time * 1000);
         return Jwts.builder()
-                .claim("username", username)
+                .issuer("Card-O! Inc.")
+                .signWith(getSecretKey())
+                .subject(userId.toString())
+                .claim("type", type)
                 .claim("role", role)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiredMs))
-                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .issuedAt(now)
+                .expiration(expiration)
                 .compact();
     }
+
+    public void expireToken(String accessToken) {
+        blacklistTokenRedisRepository.save(accessToken, getRemainingTime(accessToken));
+        refreshTokenRedisRepository.delete(accessToken);
+        log.debug("Token added to blacklist: {}", accessToken);
+    }
+
+    private long getRemainingTime(String token) {
+        Date expiration = getClaim(token).getPayload().getExpiration();
+        Date now = new Date();
+
+        return Math.max(0, expiration.getTime() - now.getTime());
+    }
+
+    public DecodedJwtToken decodeToken(String token, String type) {
+        Claims claims = getClaim(token).getPayload();
+        checkType(claims, type);
+
+        return new DecodedJwtToken(
+                Long.valueOf(claims.getSubject()),
+                String.valueOf(claims.get("role")),
+                String.valueOf(claims.get("type"))
+        );
+    }
+
+    private void checkType(Claims claims, String type) {
+        if (!type.equals(String.valueOf(claims.get("type")))) {
+            throw new BadRequestException("유효하지 않은 토큰입니다.");
+        }
+    }
+
+    public String findRefreshTokenByAccessToken(String accessToken) {
+        return refreshTokenRedisRepository.findById(accessToken)
+                .orElseThrow(() -> new BadRequestException("유효하지 않은 토큰입니다."));
+    }
+
 }

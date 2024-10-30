@@ -1,7 +1,6 @@
-package a107.cardmore.domain.company.entity;
+package a107.cardmore.domain.item.entity;
 
-import a107.cardmore.domain.card.entity.Card;
-import a107.cardmore.domain.item.entity.Item;
+import a107.cardmore.domain.marker.entity.Marker;
 import a107.cardmore.domain.user.entity.User;
 import a107.cardmore.util.base.BaseTimeEntity;
 import jakarta.persistence.CascadeType;
@@ -13,10 +12,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,38 +26,34 @@ import org.hibernate.annotations.SQLRestriction;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@SQLDelete(sql = "UPDATE company SET is_deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE item SET is_deleted = true WHERE id = ?")
 @SQLRestriction("is_deleted = false")
-@Table(name = "company")
-public class Company extends BaseTimeEntity {
+@Table(name = "item")
+public class Item extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
-    private String companyNo;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "marker_id", nullable = false)
+    private Marker marker;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private boolean isSelected = false;
+    @Column(name = "category", nullable = false, length = 100)
+    private String category;
+
+    @Column(name = "is_done", nullable = false)
+    private Boolean isDone = false;
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean isDeleted = false;
+    private Boolean isDeleted = false;
 
-    @OneToMany(mappedBy = "company", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Card> cards = new ArrayList<>();
-
-    public void changeIsSelected(boolean isSelected) {
-        this.isSelected = isSelected;
-    }
 }

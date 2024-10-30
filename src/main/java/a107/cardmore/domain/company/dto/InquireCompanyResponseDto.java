@@ -8,5 +8,5 @@ import lombok.Setter;
 public  class InquireCompanyResponseDto {
     Long id;
     String name;
-    Boolean isSelected;
+    boolean isSelected;
 }

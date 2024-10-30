@@ -1,14 +1,22 @@
 package a107.cardmore.domain.card.entity;
 
 import a107.cardmore.domain.company.entity.Company;
+import a107.cardmore.domain.discount.entity.Discount;
+import a107.cardmore.domain.item.entity.Item;
+import a107.cardmore.util.base.BaseTimeEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,7 +32,7 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLDelete(sql = "UPDATE card SET is_deleted = true WHERE id = ?")
 @SQLRestriction("is_deleted = false")
 @Table(name = "card")
-public class Card {
+public class Card extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,11 +68,15 @@ public class Card {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean isSelected = false;
+    private boolean isSelected = false;
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean isDeleted = false;
+    private boolean isDeleted = false;
+
+    @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Discount> discounts = new ArrayList<>();
 
     public void changeIsSelected(Boolean isSelected) {
         this.isSelected = isSelected;

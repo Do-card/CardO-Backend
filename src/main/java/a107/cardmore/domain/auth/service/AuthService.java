@@ -1,19 +1,20 @@
 package a107.cardmore.domain.auth.service;
 
+import a107.cardmore.domain.auth.dto.LoginRequestDto;
+import a107.cardmore.domain.auth.dto.LoginResponseDto;
 import a107.cardmore.domain.auth.dto.RegisterRequestDto;
 import a107.cardmore.domain.auth.dto.RegisterResponseDto;
 import a107.cardmore.domain.auth.mapper.AuthMapper;
 import a107.cardmore.domain.bank.entity.Bank;
 import a107.cardmore.domain.bank.service.BankModuleService;
-import a107.cardmore.domain.card.dto.CardColorInfo;
 import a107.cardmore.domain.card.service.CardModuleService;
 import a107.cardmore.domain.company.entity.Company;
 import a107.cardmore.domain.company.service.CompanyModuleService;
 import a107.cardmore.domain.user.entity.User;
 import a107.cardmore.domain.user.repository.UserRepository;
 import a107.cardmore.global.exception.BadRequestException;
+import a107.cardmore.global.security.JwtUtil;
 import a107.cardmore.util.api.RestTemplateUtil;
-import a107.cardmore.util.api.dto.card.CardProductResponseRestTemplateDto;
 import a107.cardmore.util.api.dto.card.CardResponseRestTemplateDto;
 import a107.cardmore.util.api.dto.card.CreateCardRequestRestTemplateDto;
 import a107.cardmore.util.api.dto.member.CreateMemberRequestRestTemplateDto;
@@ -29,6 +30,8 @@ import java.util.*;
 @Service
 @Transactional
 public class AuthService {
+
+    private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthMapper authMapper;
@@ -36,6 +39,20 @@ public class AuthService {
     private final CompanyModuleService companyModuleService;
     private final CardModuleService cardModuleService;
     private final BankModuleService bankModuleService;
+
+    public LoginResponseDto login(LoginRequestDto request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("로그인에 실패하였습니다."));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            throw new BadRequestException("로그인에 실패하였습니다.");
+        }
+
+        String accessToken = jwtUtil.generateAccessToken(user);
+        String refreshToken = jwtUtil.generateRefreshToken(user);
+        jwtUtil.saveRefreshToken(accessToken, refreshToken);
+        return new LoginResponseDto(accessToken, refreshToken);
+    }
 
     public RegisterResponseDto registerUser(RegisterRequestDto request) {
         userRepository.findByEmail(request.getEmail())

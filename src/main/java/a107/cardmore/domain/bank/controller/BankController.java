@@ -1,7 +1,6 @@
 package a107.cardmore.domain.bank.controller;
 
 import a107.cardmore.domain.bank.dto.*;
-import a107.cardmore.domain.bank.service.BankModuleService;
 import a107.cardmore.domain.bank.service.BankService;
 import a107.cardmore.util.api.dto.card.*;
 import a107.cardmore.util.api.dto.member.CreateMemberResponseRestTemplateDto;
@@ -71,19 +70,19 @@ public class BankController {
     }
 
     @PostMapping("/transaction/{email}")
-    public BaseSuccessResponse<CreateCreditCardTransactionResponseRestTemplateDto> createCreditCardTransaction(@PathVariable("email") String email,@RequestBody CreateCreditCardTransactionRequestDto requestBankDto){
+    public BaseSuccessResponse<CreateCreditCardTransactionResponseRestTemplateDto> createCreditCardTransaction(@PathVariable("email") String email, @RequestBody CreateCreditCardTransactionRequestDto requestBankDto){
         log.info("카드 결제 API");
         return new BaseSuccessResponse<>(bankService.createCreditCardTransaction(email,requestBankDto));
     }
 
     @PostMapping("/transaction/{email}/inquire")
-    public BaseSuccessResponse<InquireCreditCardTransactionListResponseRestTemplateDto> inquireTransaction(@PathVariable("email") String email,@RequestBody InquireCreditCardTransactionListRequestDto requestDto){
+    public BaseSuccessResponse<InquireCreditCardTransactionListResponseRestTemplateDto> inquireTransaction(@PathVariable("email") String email, @RequestBody InquireCreditCardTransactionListRequestDto requestDto){
         log.info("카드 결제 내역 조회 API");
         return new BaseSuccessResponse<>(bankService.inquireCreditCardTransactionList(email,requestDto));
     }
 
     @PostMapping("/billing/{email}")
-    public BaseSuccessResponse<List<InquireBillingStatementsResponseRestTemplateDto>> inquireBilling(@PathVariable("email") String email,@RequestBody InquireBillingStatementsRequestDto requestBankDto){
+    public BaseSuccessResponse<List<InquireBillingStatementsResponseRestTemplateDto>> inquireBilling(@PathVariable("email") String email, @RequestBody InquireBillingStatementsRequestDto requestBankDto){
         log.info("청구서 조회 API");
         return new BaseSuccessResponse<>(bankService.inquireBillingStatements(email,requestBankDto));
     }

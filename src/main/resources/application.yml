@@ -11,10 +11,18 @@ spring:
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
   data:
+<<<<<<< HEAD
     elasticsearch:
       repositories:
         enabled: true
       url: ${ELASTICSEARCH_URL}:${ELASTICSEARCH_PORT}
+=======
+    redis:
+      password: ${REDIS_PASSWORD}
+      cluster:
+        nodes: ${REDIS_NODES}
+        max-redirects: 6
+>>>>>>> 43a8fa465980a8458ff8bf9fa2efe09af0dc7f6a
 
 jwt:
   secret-key: ${SECRET_KEY}
@@ -30,3 +38,9 @@ fintech:
   institution:
     code: ${FINTECH_INSTITUTION_CODE}
 
+<<<<<<< HEAD
+=======
+logging:
+  level:
+    a107.cardmore: debug
+>>>>>>> 43a8fa465980a8458ff8bf9fa2efe09af0dc7f6a
