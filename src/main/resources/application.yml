@@ -10,6 +10,11 @@ spring:
     url: ${DATASOURCE_URL}
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
+  data:
+    elasticsearch:
+      repositories:
+        enabled: true
+      url: ${ELASTICSEARCH_URL}:${ELASTICSEARCH_PORT}
 
 jwt:
   secret-key: ${SECRET_KEY}
@@ -24,3 +29,4 @@ fintech:
     no: ${FINTECH_API_NO}
   institution:
     code: ${FINTECH_INSTITUTION_CODE}
+
