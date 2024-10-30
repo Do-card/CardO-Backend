@@ -54,11 +54,11 @@ public class Marker extends BaseTimeEntity {
     private double longitude;
 
     @Column(name = "is_favorite", nullable = false)
-    private Boolean isFavorite = false;
+    private boolean isFavorite = false;
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean isDeleted = false;
+    private boolean isDeleted = false;
 
     @OneToMany(mappedBy = "marker", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
