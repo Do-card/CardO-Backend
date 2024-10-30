@@ -31,6 +31,17 @@ fintech:
   institution:
     code: ${FINTECH_INSTITUTION_CODE}
 
+springdoc:
+  default-consumes-media-type: application/json;charset=UTF-8
+  api-docs:
+    enabled: true
+    path: '/docs'
+  swagger-ui:
+    enabled: true
+    path: '/swagger'
+    try-it-out-enabled: true
+    operations-sorter: alpha
+
 logging:
   level:
     a107.cardmore: debug
