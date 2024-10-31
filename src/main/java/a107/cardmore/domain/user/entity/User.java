@@ -49,7 +49,7 @@ public class User extends BaseTimeEntity {
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean isDeleted = false;
+    private Boolean isDeleted = false;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
