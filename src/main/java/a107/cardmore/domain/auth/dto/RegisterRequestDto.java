@@ -1,24 +1,24 @@
 package a107.cardmore.domain.auth.dto;
 
 import a107.cardmore.domain.user.entity.User;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.antlr.v4.runtime.misc.NotNull;
 
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 public class RegisterRequestDto {
-    @NotNull
+    @Column(nullable = false)
     private String name;
-    @NotNull
+    @Column(nullable = false)
     private String email;
-    @NotNull
+    @Column(nullable = false)
     private String password;
-    @NotNull
+    @Column(nullable = false)
     private String nickName;
 
     public User createUser(String password, String userKey, String accountNo) {

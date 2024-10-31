@@ -42,12 +42,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private Authentication getAuthentication(String token) {
         DecodedJwtToken decodedJwtToken = jwtUtil.decodeToken(token, ACCESS_TOKEN);
 
-        Long memberId = decodedJwtToken.getUserId();
+        String email = decodedJwtToken.getEmail();
         String role = decodedJwtToken.getRole();
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(role));
 
-        return new UsernamePasswordAuthenticationToken(memberId, null, authorities);
+        return new UsernamePasswordAuthenticationToken(email, null, authorities);
     }
 
     private String resolveToken(HttpServletRequest request) {

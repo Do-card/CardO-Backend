@@ -9,5 +9,5 @@ import lombok.ToString;
 @ToString
 public class SelectedInfo {
     private Long id;
-    private boolean isSelected;
+    private Boolean isSelected;
 }

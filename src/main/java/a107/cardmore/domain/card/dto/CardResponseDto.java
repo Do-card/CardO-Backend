@@ -1,7 +1,6 @@
 package a107.cardmore.domain.card.dto;
 
 import a107.cardmore.domain.card.entity.Card;
-import a107.cardmore.util.api.dto.card.CardBenefitsInfo;
 import a107.cardmore.util.api.dto.card.CardProductResponseRestTemplateDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,9 +28,10 @@ public class CardResponseDto {
     private String cardDescription;
     private String colorBackground;
     private String colorTitle;
-    private boolean isSelected;
+    private Boolean isSelected;
     private Long limitRemaining;
     private Long performanceRemaining;
+    @Builder.Default
     private List<CardBenefitResponseDto> cardBenefits = new ArrayList<>();
 
     public CardResponseDto(Card card, CardProductResponseRestTemplateDto cardProduct) {
@@ -46,7 +46,7 @@ public class CardResponseDto {
         this.cardDescription = cardProduct.getCardDescription();
         this.colorBackground = card.getColorBackground();
         this.colorTitle = card.getColorTitle();
-        this.isSelected = card.isSelected();
+        this.isSelected = card.getIsSelected();
         this.limitRemaining = card.getLimitRemaining();
         this.performanceRemaining = card.getPerformanceRemaining();
         cardProduct.getCardBenefitsInfo().forEach(benefitsInfo ->
