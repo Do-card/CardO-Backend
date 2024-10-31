@@ -8,6 +8,7 @@ import a107.cardmore.domain.marker.mapper.MarkerMapper;
 import a107.cardmore.domain.user.entity.User;
 import a107.cardmore.domain.user.service.UserModuleService;
 import a107.cardmore.global.exception.BadRequestException;
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -126,4 +127,55 @@ public class MarkerService {
         return marker;
     }
 
+    //TODO: Redis 캐싱 로직 추가, FCM 알림 추가
+    public List<MarkerResponseDto> getNearbyMarkers(String email,
+        MarkerNearbyRequestDto markerNearbyRequestDto) {
+        final int NEARBY_DISTANCE = 100; // 알림 보낼 거리 기준 거리
+        User user = userModuleService.getUserByEmail(email);
+        List<Marker> userMarkers = markerModuleService.getAllMarkers(user);
+        List<MarkerResponseDto> nearbyMarkers = new ArrayList<>();
+        for (Marker marker : userMarkers) {
+            //장소 등록 안되어있는 경우
+            if(marker.getPoiId() == null){
+                continue;
+            }
+            //하나라도 완료하지 않은 item이 있는 마커만 리턴
+            if(!hasIncompleteItem(marker)){
+                continue;
+            }
+            double currentDistance = calculateDistance(markerNearbyRequestDto.getLatitude(), markerNearbyRequestDto.getLongitude(),
+                marker.getLatitude(), marker.getLongitude());
+            if(currentDistance<=NEARBY_DISTANCE){
+                nearbyMarkers.add(markerMapper.toMarkerResponseDto(marker));
+            }
+        }
+        return nearbyMarkers;
+    }
+
+    private boolean hasIncompleteItem(Marker marker) {
+        for (Item item : marker.getItems()) {
+            if(!item.getIsDone()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int EARTH_RADIUS_M = 6371000; // 지구 반지름 (단위: m)
+
+        // 위도 및 경도를 라디안으로 변환
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+
+        // Haversine 공식을 이용하여 두 지점 간의 거리 계산
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2) +
+            Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        // 거리를 m 단위로 반환
+        return EARTH_RADIUS_M * c;
+    }
 }

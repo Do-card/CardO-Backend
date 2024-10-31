@@ -3,6 +3,7 @@ package a107.cardmore.domain.marker.controller;
 import a107.cardmore.domain.marker.dto.*;
 import a107.cardmore.domain.marker.service.MarkerService;
 import a107.cardmore.util.base.BaseSuccessResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -64,6 +65,12 @@ public class MarkerController {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         markerService.deleteMarker(userEmail, markerId);
         return new BaseSuccessResponse<>(null);
+    }
+
+    @PostMapping("/nearby")
+    public BaseSuccessResponse<List<MarkerResponseDto>> getNearbyMarkers(@RequestBody MarkerNearbyRequestDto markerNearbyRequestDto){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return new BaseSuccessResponse<>(markerService.getNearbyMarkers(email, markerNearbyRequestDto));
     }
 
 }
