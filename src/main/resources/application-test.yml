@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: cardmore
+  jackson:
+    time-zone: Asia/Seoul
+  datasource:
+    url: ${DATASOURCE_TEST_URL}
+    username: ${DATASOURCE_TEST_USERNAME}
+    password: ${DATASOURCE_TEST_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+
+
+jwt:
+  secret-key: ${SECRET_KEY}
+  access-token-exp: ${ACCESS_TOKEN_EXP}
+  refresh-token-exp: ${REFRESH_TOKEN_EXP}
+
+fintech:
+  api:
+    url: ${FINTECH_API_URL}
+    key: ${FINTECH_API_KEY}
+  app:
+    no: ${FINTECH_API_NO}
+  institution:
+    code: ${FINTECH_INSTITUTION_CODE}

@@ -59,5 +59,5 @@ public class Discount extends BaseTimeEntity {
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean isDeleted = false;
+    private Boolean isDeleted = false;
 }

@@ -21,7 +21,7 @@ public class BlacklistTokenRedisRepository extends BaseRedisRepository<String> {
         save(token, "EXPIRED", ttl);
     }
 
-    public boolean hasKey(String token){
+    public Boolean hasKey(String token){
         Boolean hasKey = redisTemplate.hasKey(prefix + token);
 
         if (hasKey == null){

@@ -46,18 +46,18 @@ public class JwtUtil {
     }
 
     private void validateToken(String token){
-        boolean isBlacked = blacklistTokenRedisRepository.hasKey(token);
+        Boolean isBlacked = blacklistTokenRedisRepository.hasKey(token);
 
         if (isBlacked) {
             throw new BadRequestException("유효하지 않은 토큰입니다.");
         }
     }
     public String generateAccessToken(User user){
-        return issueToken(user.getId(), user.getRole(), ACCESS_TOKEN, accessTokenExp);
+        return issueToken(user.getEmail(), user.getRole(), ACCESS_TOKEN, accessTokenExp);
     }
 
     public String generateRefreshToken(User user){
-        return issueToken(user.getId(), user.getRole(), REFRESH_TOKEN, refreshTokenExp);
+        return issueToken(user.getEmail(), user.getRole(), REFRESH_TOKEN, refreshTokenExp);
     }
 
     public void saveRefreshToken(String accessToken, String refreshToken){
@@ -69,13 +69,13 @@ public class JwtUtil {
         expireToken(oldAccessToken);
     }
 
-    private String issueToken(Long userId, String role, String type, Long time) {
+    private String issueToken(String email, String role, String type, Long time) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + time * 1000);
         return Jwts.builder()
                 .issuer("Card-O! Inc.")
                 .signWith(getSecretKey())
-                .subject(userId.toString())
+                .subject(email)
                 .claim("type", type)
                 .claim("role", role)
                 .issuedAt(now)
@@ -101,7 +101,7 @@ public class JwtUtil {
         checkType(claims, type);
 
         return new DecodedJwtToken(
-                Long.valueOf(claims.getSubject()),
+                String.valueOf(claims.getSubject()),
                 String.valueOf(claims.get("role")),
                 String.valueOf(claims.get("type"))
         );

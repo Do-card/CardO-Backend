@@ -36,7 +36,8 @@ public class SecurityConfig{
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/banks/**").permitAll()
                         .requestMatchers("/users/**").hasAuthority("USER")
-                        .anyRequest().authenticated()
+//                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class)

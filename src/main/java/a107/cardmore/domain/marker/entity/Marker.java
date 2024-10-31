@@ -16,10 +16,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -42,18 +40,20 @@ public class Marker extends BaseTimeEntity {
     private User user;
 
     @Column(name = "name", nullable = false, length = 100)
+    @Builder.Default
     private String name = "";
 
     @Column(name = "poi_id", length = 100)
     private String poiId;
 
     @Column(name = "latitude")
-    private double latitude;
+    private Double latitude;
 
     @Column(name = "longitude")
-    private double longitude;
+    private Double longitude;
 
     @Column(name = "is_favorite", nullable = false)
+    @Builder.Default
     private Boolean isFavorite = false;
 
     @Column(nullable = false)
@@ -63,5 +63,19 @@ public class Marker extends BaseTimeEntity {
     @OneToMany(mappedBy = "marker", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Item> items = new ArrayList<>();
+
+    public void updateName(String name){
+        this.name = name;
+    }
+
+    public void updateLocation(String poiId,Double latitude, Double longitude){
+        this.poiId = poiId;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public void updateFavorite(Boolean isFavorite){
+        this.isFavorite = isFavorite;
+    }
 
 }

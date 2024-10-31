@@ -68,11 +68,11 @@ public class Card extends BaseTimeEntity {
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean isSelected = false;
+    private Boolean isSelected = false;
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean isDeleted = false;
+    private Boolean isDeleted = false;
 
     @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

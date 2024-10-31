@@ -1,9 +1,8 @@
 package a107.cardmore.domain.item.entity;
 
+import a107.cardmore.domain.item.dto.ItemRequestDto;
 import a107.cardmore.domain.marker.entity.Marker;
-import a107.cardmore.domain.user.entity.User;
 import a107.cardmore.util.base.BaseTimeEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,17 +12,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
 @Builder
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @SQLDelete(sql = "UPDATE item SET is_deleted = true WHERE id = ?")
@@ -36,10 +33,6 @@ public class Item extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "marker_id", nullable = false)
     private Marker marker;
 
@@ -50,10 +43,23 @@ public class Item extends BaseTimeEntity {
     private String category;
 
     @Column(name = "is_done", nullable = false)
+    @Builder.Default
     private Boolean isDone = false;
 
     @Column(nullable = false)
     @Builder.Default
     private Boolean isDeleted = false;
 
+    public void update(ItemRequestDto itemRequestDto){
+        this.name = itemRequestDto.getName();
+        this.category = itemRequestDto.getCategory();
+    }
+
+    public void changeState(){
+        this.isDone = !this.isDone;
+    }
+
+    public void updateMarker(Marker marker) {
+        this.marker = marker;
+    }
 }

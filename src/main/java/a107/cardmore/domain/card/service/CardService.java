@@ -65,7 +65,7 @@ public class CardService {
 
         for (SelectedInfo selectedInfo : selectedCards) {
             Card card = cardModuleService.findCardById(selectedInfo.getId());
-            card.changeIsSelected(selectedInfo.isSelected());
+            card.changeIsSelected(selectedInfo.getIsSelected());
         }
     }
 
@@ -78,8 +78,7 @@ public class CardService {
         List<CardResponseDto> mySelectedCards = new ArrayList<>();
 
         for(Card card : userCard){
-//            System.out.println("cardId : " + card.getId());
-            if(!card.isSelected()) continue;
+            if(!card.getIsSelected()) continue;
             for(CardProductResponseRestTemplateDto restCard : cards){
                 if(restCard.getCardUniqueNo().equals(card.getCardUniqueNo())){
                     mySelectedCards.add(new CardResponseDto(card, restCard));

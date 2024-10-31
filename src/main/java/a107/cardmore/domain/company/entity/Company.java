@@ -1,7 +1,6 @@
 package a107.cardmore.domain.company.entity;
 
 import a107.cardmore.domain.card.entity.Card;
-import a107.cardmore.domain.item.entity.Item;
 import a107.cardmore.domain.user.entity.User;
 import a107.cardmore.util.base.BaseTimeEntity;
 import jakarta.persistence.CascadeType;
@@ -50,17 +49,17 @@ public class Company extends BaseTimeEntity {
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean isSelected = false;
+    private Boolean isSelected = false;
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean isDeleted = false;
+    private Boolean isDeleted = false;
 
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Card> cards = new ArrayList<>();
 
-    public void changeIsSelected(boolean isSelected) {
+    public void changeIsSelected(Boolean isSelected) {
         this.isSelected = isSelected;
     }
 }

@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class UpdateCompanyRequestDto {
     Long id;
-    boolean isSelected;
+    Boolean isSelected;
 }
