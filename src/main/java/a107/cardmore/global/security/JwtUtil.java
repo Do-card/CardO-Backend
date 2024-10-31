@@ -25,7 +25,6 @@ import static a107.cardmore.util.constant.RedisPrefix.REFRESH_TOKEN;
 @RequiredArgsConstructor
 public class JwtUtil {
 
-    // TODO: Exception 처리 및 세분화
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
     private final BlacklistTokenRedisRepository blacklistTokenRedisRepository;
 
@@ -33,25 +32,27 @@ public class JwtUtil {
     @Value("${jwt.access-token-exp}") private long accessTokenExp;
     @Value("${jwt.refresh-token-exp}") private long refreshTokenExp;
 
-    private SecretKey getSecretKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes());
-    }
-
     public Jws<Claims> getClaim(String token){
-        validateToken(token);
         return Jwts.parser()
                 .verifyWith(getSecretKey())
                 .build()
                 .parseSignedClaims(token);
     }
 
-    private void validateToken(String token){
-        Boolean isBlacked = blacklistTokenRedisRepository.hasKey(token);
+    public boolean isTokenExpired(String token){
+        Date expiration = getClaim(token).getPayload().getExpiration();
+        return expiration.before(new Date());
+    }
 
-        if (isBlacked) {
+    public void validateRefreshToken(String refreshToken){
+        Boolean isAvailable = refreshTokenRedisRepository.hasKey(refreshToken);
+        Boolean isBlacked = blacklistTokenRedisRepository.hasKey(refreshToken);
+
+        if (!isAvailable || isBlacked) {
             throw new BadRequestException("유효하지 않은 토큰입니다.");
         }
     }
+
     public String generateAccessToken(User user){
         return issueToken(user.getEmail(), user.getRole(), ACCESS_TOKEN, accessTokenExp);
     }
@@ -61,12 +62,12 @@ public class JwtUtil {
     }
 
     public void saveRefreshToken(String accessToken, String refreshToken){
-        refreshTokenRedisRepository.save(accessToken, refreshToken);
+        refreshTokenRedisRepository.save(refreshToken, accessToken);
     }
 
-    public void renewRefreshToken(String oldAccessToken, String newAccessToken, String newRefreshToken){
-        refreshTokenRedisRepository.save(newAccessToken, newRefreshToken);
-        expireToken(oldAccessToken);
+    public void saveRefreshToken(String oldRefreshToken, String newAccessToken, String newRefreshToken){
+        saveRefreshToken(newAccessToken, newRefreshToken);
+        expireToken(oldRefreshToken);
     }
 
     private String issueToken(String email, String role, String type, Long time) {
@@ -83,10 +84,15 @@ public class JwtUtil {
                 .compact();
     }
 
-    public void expireToken(String accessToken) {
-        blacklistTokenRedisRepository.save(accessToken, getRemainingTime(accessToken));
-        refreshTokenRedisRepository.delete(accessToken);
-        log.debug("Token added to blacklist: {}", accessToken);
+    public void expireToken(String refreshToken) {
+        if (!refreshTokenRedisRepository.hasKey(refreshToken)){
+            log.debug("존재하지 않는 토큰입니다.");
+            return;
+        }
+
+        blacklistTokenRedisRepository.save(refreshToken, getRemainingTime(refreshToken));
+        refreshTokenRedisRepository.delete(refreshToken);
+        log.debug("블랙리스트에 등록되었습니다.: {}", refreshToken);
     }
 
     private long getRemainingTime(String token) {
@@ -98,8 +104,9 @@ public class JwtUtil {
 
     public DecodedJwtToken decodeToken(String token, String type) {
         Claims claims = getClaim(token).getPayload();
-        checkType(claims, type);
 
+        isTokenExpired(token);
+        checkType(claims, type);
         return new DecodedJwtToken(
                 String.valueOf(claims.getSubject()),
                 String.valueOf(claims.get("role")),
@@ -107,15 +114,15 @@ public class JwtUtil {
         );
     }
 
-    private void checkType(Claims claims, String type) {
-        if (!type.equals(String.valueOf(claims.get("type")))) {
-            throw new BadRequestException("유효하지 않은 토큰입니다.");
-        }
+    private SecretKey getSecretKey() {
+        return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String findRefreshTokenByAccessToken(String accessToken) {
-        return refreshTokenRedisRepository.findById(accessToken)
-                .orElseThrow(() -> new BadRequestException("유효하지 않은 토큰입니다."));
+    private void checkType(Claims claims, String type) {
+        String claimType = String.valueOf(claims.get("type"));
+        if (!type.equals(claimType)) {
+            throw new BadRequestException("유효하지 않은 토큰입니다.");
+        }
     }
 
 }
