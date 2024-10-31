@@ -1,9 +1,6 @@
 package a107.cardmore.domain.auth.service;
 
-import a107.cardmore.domain.auth.dto.LoginRequestDto;
-import a107.cardmore.domain.auth.dto.LoginResponseDto;
-import a107.cardmore.domain.auth.dto.RegisterRequestDto;
-import a107.cardmore.domain.auth.dto.RegisterResponseDto;
+import a107.cardmore.domain.auth.dto.*;
 import a107.cardmore.domain.auth.mapper.AuthMapper;
 import a107.cardmore.domain.bank.entity.Bank;
 import a107.cardmore.domain.bank.service.BankModuleService;
@@ -19,12 +16,15 @@ import a107.cardmore.util.api.dto.card.CardResponseRestTemplateDto;
 import a107.cardmore.util.api.dto.card.CreateCardRequestRestTemplateDto;
 import a107.cardmore.util.api.dto.member.CreateMemberRequestRestTemplateDto;
 import a107.cardmore.util.api.dto.member.CreateMemberResponseRestTemplateDto;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+
+import static a107.cardmore.util.constant.RedisPrefix.*;
 
 @RequiredArgsConstructor
 @Service
@@ -39,20 +39,7 @@ public class AuthService {
     private final CompanyModuleService companyModuleService;
     private final CardModuleService cardModuleService;
     private final BankModuleService bankModuleService;
-
-    public LoginResponseDto login(LoginRequestDto request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("로그인에 실패하였습니다."));
-
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
-            throw new BadRequestException("로그인에 실패하였습니다.");
-        }
-
-        String accessToken = jwtUtil.generateAccessToken(user);
-        String refreshToken = jwtUtil.generateRefreshToken(user);
-        jwtUtil.saveRefreshToken(accessToken, refreshToken);
-        return new LoginResponseDto(accessToken, refreshToken);
-    }
+    private final HttpServletRequest request;
 
     public RegisterResponseDto registerUser(RegisterRequestDto request) {
         userRepository.findByEmail(request.getEmail())
@@ -116,6 +103,60 @@ public class AuthService {
         });
 
         return authMapper.toRegisterResponseDto(user);
+    }
+
+    public TokenResponseDto login(LoginRequestDto request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("로그인에 실패하였습니다."));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            throw new BadRequestException("로그인에 실패하였습니다.");
+        }
+
+        String accessToken = jwtUtil.generateAccessToken(user);
+        String refreshToken = jwtUtil.generateRefreshToken(user);
+        jwtUtil.saveRefreshToken(accessToken, refreshToken);
+        return new TokenResponseDto(accessToken, refreshToken);
+    }
+
+    public void logout(){
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader == null){
+            return;
+        }
+
+        if (authorizationHeader.startsWith("Bearer ")) {
+            String accessToken = authorizationHeader.substring(7);
+            jwtUtil.expireToken(accessToken);
+        } else {
+            throw new BadRequestException("잘못된 Authorization 헤더입니다.");
+        }
+    }
+
+    public TokenResponseDto refresh(RefreshRequestDto requestDto){
+        String oldRefreshToken = requestDto.getRefreshToken();
+
+        jwtUtil.validateRefreshToken(oldRefreshToken);
+        DecodedJwtToken decodeToken = jwtUtil.decodeToken(oldRefreshToken, REFRESH_TOKEN);
+        User user = userRepository.findByEmail(decodeToken.getEmail())
+                .orElseThrow(() -> new BadRequestException("잘못된 토큰입니다."));
+
+        String newAccessToken = jwtUtil.generateAccessToken(user);
+        String newRefreshToken = jwtUtil.generateRefreshToken(user);
+        jwtUtil.saveRefreshToken(oldRefreshToken, newAccessToken, newRefreshToken);
+        return new TokenResponseDto(newAccessToken, newRefreshToken);
+    }
+
+    public void checkAuth(){
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader == null ||
+            !authorizationHeader.startsWith("Bearer ") ||
+            jwtUtil.isTokenExpired(authorizationHeader.substring(7))
+        ) {
+            throw new BadRequestException("로그인되지 않았습니다.");
+        }
     }
 
 }
