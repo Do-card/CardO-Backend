@@ -12,7 +12,7 @@ import static org.springframework.data.elasticsearch.annotations.FieldType.*;
 @Getter
 @Builder
 @ToString
-@Document(indexName = "item_index")
+@Document(indexName = "user_log")
 public class ItemDocument {
     @Id
     @Field(type = Keyword)
