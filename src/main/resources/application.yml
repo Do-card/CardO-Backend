@@ -11,6 +11,10 @@ spring:
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
   data:
+    elasticsearch:
+      repositories:
+        enabled: true
+      url: ${ELASTICSEARCH_URL}:${ELASTICSEARCH_PORT}
     redis:
       password: ${REDIS_PASSWORD}
       cluster:
