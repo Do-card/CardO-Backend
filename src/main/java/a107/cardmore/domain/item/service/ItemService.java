@@ -1,7 +1,14 @@
 package a107.cardmore.domain.item.service;
 
+import a107.cardmore.domain.item.dto.ItemRequestDto;
+import a107.cardmore.domain.item.dto.ItemResponseDto;
+import a107.cardmore.domain.item.entity.Item;
+import a107.cardmore.domain.item.mapper.ItemMapper;
+import a107.cardmore.domain.marker.service.MarkerModuleService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+@RequiredArgsConstructor
 @Service
 public class ItemService {
 
