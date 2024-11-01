@@ -20,7 +20,7 @@ public class AuthController {
         return new BaseSuccessResponse<>(authService.login(loginRequestDto));
     }
 
-    @PostMapping
+    @PostMapping("/logout")
     public BaseSuccessResponse<Void> logout(){
         log.info("로그아웃 API");
         authService.logout();

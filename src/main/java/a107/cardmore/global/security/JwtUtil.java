@@ -5,6 +5,7 @@ import a107.cardmore.domain.redis.BlacklistTokenRedisRepository;
 import a107.cardmore.domain.redis.RefreshTokenRedisRepository;
 import a107.cardmore.domain.user.entity.User;
 import a107.cardmore.global.exception.BadRequestException;
+import a107.cardmore.global.exception.InvalidTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -103,15 +104,18 @@ public class JwtUtil {
     }
 
     public DecodedJwtToken decodeToken(String token, String type) {
-        Claims claims = getClaim(token).getPayload();
+        try {
+            Claims claims = getClaim(token).getPayload();
 
-        isTokenExpired(token);
-        checkType(claims, type);
-        return new DecodedJwtToken(
-                String.valueOf(claims.getSubject()),
-                String.valueOf(claims.get("role")),
-                String.valueOf(claims.get("type"))
-        );
+            checkType(claims, type);
+            return new DecodedJwtToken(
+                    String.valueOf(claims.getSubject()),
+                    String.valueOf(claims.get("role")),
+                    String.valueOf(claims.get("type"))
+            );
+        } catch (Exception e) {
+            throw new InvalidTokenException();
+        }
     }
 
     private SecretKey getSecretKey() {
@@ -121,7 +125,7 @@ public class JwtUtil {
     private void checkType(Claims claims, String type) {
         String claimType = String.valueOf(claims.get("type"));
         if (!type.equals(claimType)) {
-            throw new BadRequestException("유효하지 않은 토큰입니다.");
+            throw new InvalidTokenException();
         }
     }
 
