@@ -12,14 +12,13 @@ spring:
     password: ${DATASOURCE_PASSWORD}
   data:
     elasticsearch:
+      url: ${ELASTICSEARCH_URL}:${ELASTICSEARCH_PORT}
       repositories:
         enabled: true
-      url: ${ELASTICSEARCH_URL}:${ELASTICSEARCH_PORT}
     redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
-      cluster:
-        nodes: ${REDIS_NODES}
-        max-redirects: 6
 
 jwt:
   secret-key: ${SECRET_KEY}
