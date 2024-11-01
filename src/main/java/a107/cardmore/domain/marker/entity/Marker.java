@@ -52,6 +52,9 @@ public class Marker extends BaseTimeEntity {
     @Column(name = "longitude")
     private Double longitude;
 
+    @Column(name = "color_background")
+    private String colorBackground;
+
     @Column(name = "is_favorite", nullable = false)
     @Builder.Default
     private Boolean isFavorite = false;

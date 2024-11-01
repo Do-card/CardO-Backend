@@ -19,6 +19,7 @@ public class MarkerResponseDto {
     private String poiId;
     private Double latitude;
     private Double longitude;
+    private String colorBackground;
     private Boolean isFavorite;
     private LocalDateTime created;
     private LocalDateTime updated;

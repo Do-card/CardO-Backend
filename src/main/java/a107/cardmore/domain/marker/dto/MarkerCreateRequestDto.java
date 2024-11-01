@@ -10,4 +10,5 @@ import lombok.*;
 @NoArgsConstructor
 public class MarkerCreateRequestDto {
     private String name;
+    private String colorBackground;
 }
