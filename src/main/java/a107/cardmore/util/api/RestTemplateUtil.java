@@ -40,12 +40,12 @@ public class RestTemplateUtil {
 
     @Value("${fintech.api.url}")
     private String url;
-    @Value("${institution.code}")
-    private String institutionCode;
+    @Value("${fintech.api.key}")
+    private String apiKey;
     @Value("${fintech.app.no}")
     private String fintechAppNo;
-    @Value("${api.key}")
-    private String apiKey;
+    @Value("${fintech.institution.code}")
+    private String institutionCode;
 
     //정수형 UUID 생성
     private static String generateNumericUUID() {

@@ -1,7 +1,6 @@
 package a107.cardmore.domain.card.dto;
 
 import a107.cardmore.domain.card.entity.Card;
-import a107.cardmore.util.api.dto.card.CardBenefitsInfo;
 import a107.cardmore.util.api.dto.card.CardProductResponseRestTemplateDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,6 +31,7 @@ public class CardResponseDto {
     private Boolean isSelected;
     private Long limitRemaining;
     private Long performanceRemaining;
+    @Builder.Default
     private List<CardBenefitResponseDto> cardBenefits = new ArrayList<>();
 
     public CardResponseDto(Card card, CardProductResponseRestTemplateDto cardProduct) {

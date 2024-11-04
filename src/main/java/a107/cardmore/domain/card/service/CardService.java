@@ -78,7 +78,6 @@ public class CardService {
         List<CardResponseDto> mySelectedCards = new ArrayList<>();
 
         for(Card card : userCard){
-//            System.out.println("cardId : " + card.getId());
             if(!card.getIsSelected()) continue;
             for(CardProductResponseRestTemplateDto restCard : cards){
                 if(restCard.getCardUniqueNo().equals(card.getCardUniqueNo())){

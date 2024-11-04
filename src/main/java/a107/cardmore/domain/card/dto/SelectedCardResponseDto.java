@@ -11,5 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SelectedCardResponseDto {
+    @Builder.Default
     private List<SelectedInfo> cardsSelectedInfos = new ArrayList<>();
 }

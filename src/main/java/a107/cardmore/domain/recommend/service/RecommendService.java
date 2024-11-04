@@ -25,14 +25,11 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +43,6 @@ public class RecommendService {
     private final RestTemplateUtil restTemplateUtil;
     private final CardModuleService cardModuleService;
     private final CardRepository cardRepository;
-    private final BankModuleService bankModuleService;
-    private final UserModuleService userModuleService;
     private final UserRepository userRepository;
 
     public List<MapResponseDto> discountCardRecommend(List<MapRequestDto> mapRequestDtoList, Long userId) {

@@ -20,6 +20,7 @@ public class CompanyCardListResponseDto {
     private String companyNo;
     private String companyName;
     private Boolean isSelected;
+    @Builder.Default
     private List<CardResponseDto> cards = new ArrayList<>();
 
     public void addCards(Company company, List<Card> userCompanyCards, List<CardProductResponseRestTemplateDto> cardInfos) {
