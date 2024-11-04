@@ -3,16 +3,11 @@ package a107.cardmore.domain.ai.service;
 import a107.cardmore.domain.ai.dto.AiResponseDto;
 import a107.cardmore.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
