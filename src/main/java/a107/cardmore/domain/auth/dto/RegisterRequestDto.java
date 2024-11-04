@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,12 +22,15 @@ public class RegisterRequestDto {
     private String password;
     @Column(nullable = false)
     private String nickName;
+    @Column(nullable = false)
+    private LocalDate birthday;
 
     public User createUser(String password, String userKey, String accountNo) {
         return User.builder()
                 .email(email)
                 .password(password)
                 .nickName(nickName)
+                .birthday(birthday)
                 .role("USER")
                 .userKey(userKey)
                 .accountNo(accountNo)

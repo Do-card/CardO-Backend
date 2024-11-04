@@ -5,6 +5,8 @@ import a107.cardmore.domain.item.entity.Item;
 import a107.cardmore.domain.marker.entity.Marker;
 import a107.cardmore.util.base.BaseTimeEntity;
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.*;
@@ -40,6 +42,9 @@ public class User extends BaseTimeEntity {
 
     @Column(nullable = false)
     private String nickName;
+
+    @Column(nullable = false)
+    private LocalDate birthday;
 
     @Column(nullable = false, length = 10)
     private String role;
