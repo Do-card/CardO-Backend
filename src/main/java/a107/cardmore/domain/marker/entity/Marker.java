@@ -46,6 +46,9 @@ public class Marker extends BaseTimeEntity {
     @Column(name = "poi_id", length = 100)
     private String poiId;
 
+    @Column(name = "poi_name", length = 100)
+    private String poiName;
+
     @Column(name = "latitude")
     private Double latitude;
 
