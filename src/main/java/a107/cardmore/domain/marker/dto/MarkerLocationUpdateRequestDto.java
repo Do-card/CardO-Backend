@@ -10,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 public class MarkerLocationUpdateRequestDto {
     private String poiId;
+    private String poiName;
     private Double latitude;
     private Double longitude;
 }
