@@ -7,6 +7,9 @@ import a107.cardmore.domain.user.entity.User;
 import a107.cardmore.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -20,10 +23,12 @@ public class MarkerModuleService {
 
     private final MarkerRepository markerRepository;
 
+    @CachePut(value = "marker", key = "#marker.id", condition = "#marker.id != null")
     public Marker saveMarker(Marker marker){
         return markerRepository.save(marker);
     }
 
+    @CacheEvict(value = {"marker", "markerList"}, key = "#marker.id")
     public void deleteMarker(Marker marker){
         markerRepository.delete(marker);
     }
@@ -36,6 +41,7 @@ public class MarkerModuleService {
         return saveMarker(marker);
     }
 
+    @Cacheable(value = "marker", key = "#markerId")
     public Marker findById(Long markerId){
         return markerRepository.findById(markerId)
                 .orElseThrow(() -> new BadRequestException("존재하지 않는 마커입니다."));
@@ -53,6 +59,7 @@ public class MarkerModuleService {
         return markerRepository.findByUserAndItemsNameContainingAndIsDoneFalseAndMarkerIdGreaterThan(user, keyword, lastId, pageable);
     }
 
+    @Cacheable(value = "nearbyMarkers", key = "#user.id")
     public List<Marker> findByUserAndPoiIdNotNullAndHasIncompleteItems(User user){
         return markerRepository.findByUserAndPoiIdNotNullAndHasIncompleteItems(user);
     }
