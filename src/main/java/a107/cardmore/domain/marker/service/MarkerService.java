@@ -1,7 +1,6 @@
 package a107.cardmore.domain.marker.service;
 
 import a107.cardmore.domain.item.entity.Item;
-import a107.cardmore.domain.item.service.ItemModuleService;
 import a107.cardmore.domain.marker.dto.*;
 import a107.cardmore.domain.marker.entity.Marker;
 import a107.cardmore.domain.marker.mapper.MarkerMapper;
@@ -11,15 +10,10 @@ import a107.cardmore.global.exception.BadRequestException;
 import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -28,60 +22,35 @@ public class MarkerService {
 
     private final UserModuleService userModuleService;
     private final MarkerModuleService markerModuleService;
-    private final ItemModuleService itemModuleService;
     private final MarkerMapper markerMapper;
 
-    public Page<MarkerResponseDto> getAllMarkers(String email, String keyword, int page, int size) {
+    public Slice<MarkerResponseDto> getAllMarkersByKeyword(String email, String keyword, Long lastId, int limit) {
         User user = userModuleService.getUserByEmail(email);
-        Pageable pageable = PageRequest.of(page, size);
-        Page<MarkerResponseDto> markerResponseDtoPage;
+        Pageable pageable = PageRequest.of(0, limit);
+        Slice<Marker> markers;
 
         if (keyword == null || keyword.isEmpty()) {
-            List<Marker> markers = markerModuleService.getAllMarkers(user);
-            markerResponseDtoPage = markerListToMarkerDtoPage(markers, pageable);
+            markers = markerModuleService.findAllByUserAndIdGreaterThan(user, lastId, pageable);
         } else {
-            List<Item> items = itemModuleService.getAllItemsByKeyword(user, keyword);
-            markerResponseDtoPage = itemListToMarkerDtoPage(items, pageable);
+            markers = markerModuleService.findAllByUserAndItemsNameContainingAndIdGreaterThan(user, keyword, lastId, pageable);
+            markers.map(marker -> marker.getName().contains(keyword));
         }
-        return markerResponseDtoPage;
+        return markers.map(markerMapper::toMarkerResponseDto);
     }
 
-    public Page<MarkerResponseDto> getMarkers(String email, String keyword, int page, int size) {
+    public Slice<MarkerResponseDto> getUnfinishedMarkersByKeyword(String email, String keyword, Long lastId, int limit) {
         User user = userModuleService.getUserByEmail(email);
-        Pageable pageable = PageRequest.of(page, size);
-        Page<MarkerResponseDto> markerResponseDtoPage;
+        Pageable pageable = PageRequest.of(0, limit);
+        Slice<Marker> markers;
 
         if (keyword == null || keyword.isEmpty()) {
-            List<Marker> markers = markerModuleService.getAllMarkers(user);
-            markers.forEach(marker -> marker.getItems().removeIf(Item::getIsDone));
-            markerResponseDtoPage = markerListToMarkerDtoPage(markers, pageable);
+            markers = markerModuleService.findAllByUserAndIdGreaterThan(user, lastId, pageable);
         } else {
-            List<Item> items = itemModuleService.getItemsByKeyword(user, keyword);
-            markerResponseDtoPage = itemListToMarkerDtoPage(items, pageable);
+            markers = markerModuleService.findByUserAndItemsNameContainingAndIsDoneFalseAndMarkerIdGreaterThan(user, keyword, lastId, pageable);
+            markers.map(marker -> marker.getName().contains(keyword));
         }
-        return markerResponseDtoPage;
-    }
-
-    private Page<MarkerResponseDto> markerListToMarkerDtoPage(List<Marker> markers, Pageable pageable){
-        List<MarkerResponseDto> markerDtos = markers.stream()
-                .map(markerMapper::toMarkerResponseDto)
-                .toList();
-        return new PageImpl<>(markerDtos, pageable, markerDtos.size());
-    }
-
-    private Page<MarkerResponseDto> itemListToMarkerDtoPage(List<Item> items, Pageable pageable) {
-        Map<Marker, List<Item>> groupedItems = items.stream()
-                .collect(Collectors.groupingBy(Item::getMarker));
-        List<MarkerResponseDto> markerDtos = groupedItems.entrySet().stream()
-                .map(entry -> {
-                    Marker marker = entry.getKey();
-                    marker.getItems().clear(); // 기존 아이템 리스트 초기화
-                    marker.getItems().addAll(entry.getValue()); // 새로 그룹화된 아이템 추가
-                    return markerMapper.toMarkerResponseDto(marker);
-                })
-                .toList();
-
-        return new PageImpl<>(markerDtos, pageable, markerDtos.size());
+        markers.forEach(marker -> marker.getItems().removeIf(Item::getIsDone));
+        return markers.map(markerMapper::toMarkerResponseDto);
     }
 
     public MarkerResponseDto createMarker(String email, MarkerCreateRequestDto requestDto) {
@@ -128,37 +97,24 @@ public class MarkerService {
     }
 
     //TODO: Redis 캐싱 로직 추가, FCM 알림 추가
-    public List<MarkerResponseDto> getNearbyMarkers(String email,
-        MarkerNearbyRequestDto markerNearbyRequestDto) {
+    public List<MarkerResponseDto> getNearbyMarkers(String email, MarkerNearbyRequestDto markerNearbyRequestDto) {
         final int NEARBY_DISTANCE = 100; // 알림 보낼 거리 기준 거리
         User user = userModuleService.getUserByEmail(email);
-        List<Marker> userMarkers = markerModuleService.getAllMarkers(user);
+        List<Marker> userMarkers = markerModuleService.findByUserAndPoiIdNotNullAndHasIncompleteItems(user);
         List<MarkerResponseDto> nearbyMarkers = new ArrayList<>();
+
         for (Marker marker : userMarkers) {
-            //장소 등록 안되어있는 경우
-            if(marker.getPoiId() == null){
-                continue;
-            }
-            //하나라도 완료하지 않은 item이 있는 마커만 리턴
-            if(!hasIncompleteItem(marker)){
-                continue;
-            }
-            double currentDistance = calculateDistance(markerNearbyRequestDto.getLatitude(), markerNearbyRequestDto.getLongitude(),
-                marker.getLatitude(), marker.getLongitude());
-            if(currentDistance<=NEARBY_DISTANCE){
+            double currentDistance = calculateDistance(
+                    markerNearbyRequestDto.getLatitude(),
+                    markerNearbyRequestDto.getLongitude(),
+                    marker.getLatitude(),
+                    marker.getLongitude()
+            );
+            if(currentDistance <= NEARBY_DISTANCE){
                 nearbyMarkers.add(markerMapper.toMarkerResponseDto(marker));
             }
         }
         return nearbyMarkers;
-    }
-
-    private boolean hasIncompleteItem(Marker marker) {
-        for (Item item : marker.getItems()) {
-            if(!item.getIsDone()){
-                return true;
-            }
-        }
-        return false;
     }
 
     private static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
