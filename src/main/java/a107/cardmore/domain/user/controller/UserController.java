@@ -5,6 +5,7 @@ import a107.cardmore.util.base.BaseSuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,6 +17,18 @@ public class UserController {
 
     @GetMapping
     public BaseSuccessResponse<String> userNickName(){
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        return new BaseSuccessResponse<>(userService.userNickName(userEmail));
+    }
+
+    @PostMapping("/position")
+    public BaseSuccessResponse<String> userPosition(){
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        return new BaseSuccessResponse<>(userService.userNickName(userEmail));
+    }
+
+    @PostMapping("/token")
+    public BaseSuccessResponse<String> userToken(){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         return new BaseSuccessResponse<>(userService.userNickName(userEmail));
     }
