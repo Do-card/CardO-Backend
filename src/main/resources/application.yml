@@ -23,6 +23,11 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
+    data:
+      elasticsearch:
+        client:
+          config:
+            uris: http://localhost:9200
 
 jwt:
   secret-key: ${SECRET_KEY}
@@ -52,3 +57,6 @@ springdoc:
 logging:
   level:
     a107.cardmore: debug
+    org.springframework.data.elasticsearch.client: DEBUG
+    org.elasticsearch.client: DEBUG
+
