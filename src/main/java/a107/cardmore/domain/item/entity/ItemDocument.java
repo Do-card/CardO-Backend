@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
+import java.util.Date;
 
 import static org.springframework.data.elasticsearch.annotations.FieldType.*;
 
@@ -41,5 +42,11 @@ public class ItemDocument {
 
     @Field(type = Float)
     private float longitude;
+
+    @Field(type = Long)
+    private long age;
+
+    @Field(type = Date)
+    private Date userBirth;
 
 }
