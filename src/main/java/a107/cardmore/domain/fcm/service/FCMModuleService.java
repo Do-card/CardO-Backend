@@ -14,7 +14,8 @@ public class FCMModuleService {
     private final FCMRepository fcmRepository;
 
     public void saveToken(FCM fcm){
-        if(fcmRepository.findByToken(fcm.getToken()) != null) {
+        //TODO 다른 유저 아이디로 이미 등록된 토큰인 경우 예외 처리
+        if(fcmRepository.findByToken(fcm.getToken()) == null) {
             fcmRepository.save(fcm);
         }
     }
