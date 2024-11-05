@@ -4,6 +4,7 @@ import a107.cardmore.domain.company.entity.Company;
 import a107.cardmore.domain.item.entity.Item;
 import a107.cardmore.domain.marker.entity.Marker;
 import a107.cardmore.util.base.BaseTimeEntity;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -58,6 +59,7 @@ public class User extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @JsonManagedReference
     private List<Marker> markers = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
