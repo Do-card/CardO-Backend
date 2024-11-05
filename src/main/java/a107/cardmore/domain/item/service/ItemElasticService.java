@@ -2,52 +2,67 @@ package a107.cardmore.domain.item.service;
 
 import a107.cardmore.domain.item.entity.ItemDocument;
 import a107.cardmore.domain.item.repository.ItemElasticRepository;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import co.elastic.clients.elasticsearch._types.aggregations.TermsAggregation;
+import co.elastic.clients.elasticsearch.core.termvectors.Term;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.elasticsearch.core.AggregationContainer;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.Query;
+import org.springframework.data.redis.core.convert.Bucket;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class ItemElasticService {
     private final ItemElasticRepository itemElasticRepository;
-//    private final ElasticsearchRestTemplate elasticsearchRestTemplate;
+    private final ElasticsearchOperations operations;
 
-    public void getTrends(){
+    public void getTrends() {
         IndexCoordinates index = IndexCoordinates.of("user_log");
+        Criteria criteria = new Criteria("age").is(20);
 
-        Criteria criteria = new Criteria();
-        Query query = new CriteriaQuery(criteria);
-        /*
-        // 집계 추가
-        AggregationBuilder aggregation = AggregationContainer.terms("category_counts")
-                .field("category.keyword")  // .keyword 필드를 통해 정확히 일치하는 문자열을 기준으로 집계
-                .size(10);  // 상위 10개의 카테고리만 반환
+        // CriteriaQuery 생성
+        CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
 
-        // 쿼리에 집계 추가
-        query.addAggregation(aggregation);
+        // NativeQuery 빌더로 집계 추가
+        Query query = NativeQuery.builder()
+                .withQuery(criteriaQuery) // Criteria를 쿼리에 추가
+                .withMaxResults(0)
+                .withAggregation("category_counts", Aggregation.of(a -> a
+                        .terms(t -> t
+                                .field("category.keyword")
+                                .size(2))))
+                .build();
 
-        // Elasticsearch로 쿼리 실행 및 집계 결과 가져오기
-        AggregationResults aggregationResults = operations.aggregate(query, IndexCoordinates.of("user_log"));
+        // 검색 실행 및 집계 결과 가져오기
+        SearchHits<ItemDocument> searchHits = operations.search(query, ItemDocument.class, index);
+        ElasticsearchAggregations aggregations = (ElasticsearchAggregations) searchHits.getAggregations();
 
-        // 결과를 Map으로 변환
-        Map<String, Long> categoryCounts = new HashMap<>();
-        aggregationResults.forEach(bucket -> categoryCounts.put(bucket.getKeyAsString(), bucket.getDocCount()));
+        // 집계 결과를 Map에 저장하여 반환
+        Map<String, Long> result = new HashMap<>();
 
-
-        SearchHits<?> hits = operations.search(query, ItemDocument.class, index);
-        */
+        List<StringTermsBucket> bucketList = aggregations.aggregationsAsMap().get("category_counts")
+                .aggregation().getAggregate().sterms().buckets().array();
+        System.out.println(bucketList.size());
+        bucketList.forEach(bucket -> {
+            System.out.println(bucket.key().stringValue() + " : " + bucket.docCount());
+        });
     }
 
 /*
