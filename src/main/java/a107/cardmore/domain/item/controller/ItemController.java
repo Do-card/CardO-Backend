@@ -1,16 +1,26 @@
 package a107.cardmore.domain.item.controller;
 
+import a107.cardmore.domain.item.dto.ItemLocalTrendResponseDto;
 import a107.cardmore.domain.item.dto.ItemRequestDto;
 import a107.cardmore.domain.item.dto.ItemResponseDto;
+import a107.cardmore.domain.item.dto.ItemTrendResponseDto;
 import a107.cardmore.domain.item.service.ItemElasticService;
 import a107.cardmore.domain.item.service.ItemService;
 import a107.cardmore.util.base.BaseSuccessResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/items")
@@ -64,10 +74,15 @@ public class ItemController {
     }
 
 
-    @GetMapping("/test")
-    public BaseSuccessResponse<Void> getItem(){
-        itemElasticService.getTrends();
-        return new BaseSuccessResponse<>(null);
+    @GetMapping("/trend")
+    public BaseSuccessResponse<ItemTrendResponseDto> getTrend(){
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        return new BaseSuccessResponse<>(itemElasticService.getTrends(userEmail));
+    }
+
+    @GetMapping("/local-trend")
+    public BaseSuccessResponse<List<ItemLocalTrendResponseDto>> getLocalTrends(@RequestParam String poiId){
+        return new BaseSuccessResponse<>(itemElasticService.getLocalTrends(poiId));
     }
 
 }
