@@ -9,6 +9,5 @@ public class ItemRequestDto {
 
     private Long markerId;
     private String name;
-    private String category;
 
 }
