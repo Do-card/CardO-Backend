@@ -3,6 +3,7 @@ package a107.cardmore.domain.item.entity;
 import a107.cardmore.domain.item.dto.ItemRequestDto;
 import a107.cardmore.domain.marker.entity.Marker;
 import a107.cardmore.util.base.BaseTimeEntity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -34,6 +35,7 @@ public class Item extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "marker_id", nullable = false)
+    @JsonBackReference
     private Marker marker;
 
     @Column(name = "name", nullable = false, length = 100)
