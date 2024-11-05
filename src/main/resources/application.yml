@@ -29,6 +29,9 @@ spring:
           config:
             uris: http://localhost:9200
 
+ai:
+  url: ${AI_URL}
+
 jwt:
   secret-key: ${SECRET_KEY}
   access-token-exp: ${ACCESS_TOKEN_EXP}

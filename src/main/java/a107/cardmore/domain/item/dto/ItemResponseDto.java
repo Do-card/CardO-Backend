@@ -10,6 +10,7 @@ public class ItemResponseDto {
    private Long id;
    private Long markerId;
    private String name;
+   private String majorCategory;
    private String category;
    private Boolean isDone;
    private Boolean isDeleted;

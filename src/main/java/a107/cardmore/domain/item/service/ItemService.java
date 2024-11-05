@@ -1,5 +1,7 @@
 package a107.cardmore.domain.item.service;
 
+import a107.cardmore.domain.category.dto.CategoryResponseDto;
+import a107.cardmore.domain.category.service.CategoryService;
 import a107.cardmore.domain.item.dto.ItemRequestDto;
 import a107.cardmore.domain.item.dto.ItemResponseDto;
 import a107.cardmore.domain.item.entity.Item;
@@ -17,6 +19,7 @@ public class ItemService {
 
     private final ItemModuleService itemModuleService;
     private final MarkerModuleService markerModuleService;
+    private final CategoryService categoryService;
     private final ItemMapper itemMapper;
 
     public ItemResponseDto saveItem(ItemRequestDto itemRequestDto){
@@ -27,6 +30,9 @@ public class ItemService {
         }
         Item item = itemMapper.toItem(itemRequestDto);
         item.updateMarker(markerModuleService.findById(itemRequestDto.getMarkerId()));
+
+        CategoryResponseDto categories = categoryService.getAiPredictResponse(item.getName());
+        item.updateCategory(categories.getMajorCategory(), categories.getSubCategory());
         return itemMapper.toItemResponseDto(itemModuleService.save(item));
     }
 
