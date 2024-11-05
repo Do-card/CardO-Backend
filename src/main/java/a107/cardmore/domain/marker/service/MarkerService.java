@@ -12,11 +12,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MarkerService {
 
@@ -53,30 +55,35 @@ public class MarkerService {
         return markers.map(markerMapper::toMarkerResponseDto);
     }
 
+    @Transactional
     public MarkerResponseDto createMarker(String email, MarkerCreateRequestDto requestDto) {
         User user = userModuleService.getUserByEmail(email);
         Marker marker = markerModuleService.createMarker(user, requestDto);
         return markerMapper.toMarkerResponseDto(marker);
     }
 
+    @Transactional
     public MarkerResponseDto updateMarkerName(String email, long markerId, MarkerNameUpdateRequestDto requestDto){
         Marker marker = getValidatedMarker(email, markerId);
         marker.updateName(requestDto.getName());
         return markerMapper.toMarkerResponseDto(markerModuleService.saveMarker(marker));
     }
 
+    @Transactional
     public MarkerResponseDto updateMarkerLocation(String email, long markerId, MarkerLocationUpdateRequestDto requestDto){
         Marker marker = getValidatedMarker(email, markerId);
         marker.updateLocation(requestDto.getPoiId(), requestDto.getLatitude(), requestDto.getLongitude());
         return markerMapper.toMarkerResponseDto(markerModuleService.saveMarker(marker));
     }
 
+    @Transactional
     public MarkerResponseDto updateMarkerFavorite(String email, long markerId, MarkerFavoriteUpdateRequestDto requestDto){
         Marker marker = getValidatedMarker(email, markerId);
         marker.updateFavorite(requestDto.getIsFavorite());
         return markerMapper.toMarkerResponseDto(markerModuleService.saveMarker(marker));
     }
 
+    @Transactional
     public void deleteMarker(String email, long markerId) {
         Marker marker = getValidatedMarker(email, markerId);
         markerModuleService.deleteMarker(marker);
