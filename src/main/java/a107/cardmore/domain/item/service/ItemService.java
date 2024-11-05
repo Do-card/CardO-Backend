@@ -31,8 +31,8 @@ public class ItemService {
         Item item = itemMapper.toItem(itemRequestDto);
         item.updateMarker(markerModuleService.findById(itemRequestDto.getMarkerId()));
 
-//        CategoryResponseDto categories = categoryService.getAiPredictResponse(item.getName());
-//        item.updateCategory(categories.getMajorCategory(), categories.getSubCategory());
+        CategoryResponseDto categories = categoryService.getAiPredictResponse(item.getName());
+        item.updateCategory(categories.getMajorCategory(), categories.getSubCategory());
         return itemMapper.toItemResponseDto(itemModuleService.save(item));
     }
 
