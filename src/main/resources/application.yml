@@ -8,8 +8,12 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
+        format_sql: true
+        default_batch_fetch_size: 1000
         jdbc:
           time_zone: Asia/Seoul
+    show-sql: true
+    open-in-view: false
   datasource:
     url: ${DATASOURCE_URL}
     username: ${DATASOURCE_USERNAME}
