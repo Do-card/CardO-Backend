@@ -7,6 +7,5 @@ import java.util.List;
 
 public interface FCMRepository extends JpaRepository<FCM,Long> {
     List<FCM> findAllByUserId(Long userId);
-    void saveToken(FCM fcm);
     FCM findByToken(String token);
 }

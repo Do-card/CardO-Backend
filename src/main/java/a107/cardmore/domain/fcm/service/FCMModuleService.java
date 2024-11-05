@@ -15,7 +15,7 @@ public class FCMModuleService {
 
     public void saveToken(FCM fcm){
         if(fcmRepository.findByToken(fcm.getToken()) != null) {
-            fcmRepository.saveToken(fcm);
+            fcmRepository.save(fcm);
         }
     }
 }
