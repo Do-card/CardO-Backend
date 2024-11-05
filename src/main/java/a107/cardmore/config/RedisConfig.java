@@ -46,7 +46,8 @@ public class RedisConfig {
         return new LettuceConnectionFactory(redisConfiguration());
     }
 
-    private ObjectMapper objectMapper() {
+    @Bean
+    public ObjectMapper objectMapper() {
         PolymorphicTypeValidator typeValidator = BasicPolymorphicTypeValidator.builder()
                 .allowIfSubType(Object.class)
                 .build();
