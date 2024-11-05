@@ -1,4 +1,4 @@
-package a107.cardmore.domain.ai.dto;
+package a107.cardmore.domain.category.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AiResponseDto {
-
+public class CategoryResponseDto {
     private String subCategory;
     private String majorCategory;
 }

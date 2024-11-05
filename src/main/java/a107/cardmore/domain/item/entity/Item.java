@@ -39,6 +39,9 @@ public class Item extends BaseTimeEntity {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
+    @Column(name = "major_category", nullable = false, length = 100)
+    private String majorCategory;
+
     @Column(name = "category", nullable = false, length = 100)
     private String category;
 
@@ -52,7 +55,6 @@ public class Item extends BaseTimeEntity {
 
     public void update(ItemRequestDto itemRequestDto){
         this.name = itemRequestDto.getName();
-        this.category = itemRequestDto.getCategory();
     }
 
     public void changeState(){
@@ -61,5 +63,10 @@ public class Item extends BaseTimeEntity {
 
     public void updateMarker(Marker marker) {
         this.marker = marker;
+    }
+
+    public void updateCategory(String majorCategory, String category) {
+        this.majorCategory = majorCategory;
+        this.category = category;
     }
 }

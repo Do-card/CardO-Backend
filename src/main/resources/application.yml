@@ -24,6 +24,9 @@ spring:
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
 
+ai:
+  url: ${AI_URL}
+
 jwt:
   secret-key: ${SECRET_KEY}
   access-token-exp: ${ACCESS_TOKEN_EXP}
