@@ -12,9 +12,11 @@ import a107.cardmore.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class ItemService {
 
     private final ItemModuleService itemModuleService;
@@ -22,6 +24,7 @@ public class ItemService {
     private final CategoryService categoryService;
     private final ItemMapper itemMapper;
 
+    @Transactional
     public ItemResponseDto saveItem(ItemRequestDto itemRequestDto){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Marker marker = markerModuleService.findById(itemRequestDto.getMarkerId());
@@ -36,6 +39,7 @@ public class ItemService {
         return itemMapper.toItemResponseDto(itemModuleService.save(item));
     }
 
+    @Transactional
     public ItemResponseDto updateItem(Long id, ItemRequestDto itemRequestDto) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Item item = itemModuleService.findById(id);
@@ -47,6 +51,7 @@ public class ItemService {
         return itemMapper.toItemResponseDto(itemModuleService.save(item));
     }
 
+    @Transactional
     public ItemResponseDto changeCompleteState(Long id){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Item item = itemModuleService.findById(id);
@@ -58,6 +63,7 @@ public class ItemService {
         return itemMapper.toItemResponseDto(itemModuleService.save(item));
     }
 
+    @Transactional
     public void deleteItem(Long id){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Item item = itemModuleService.findById(id);
