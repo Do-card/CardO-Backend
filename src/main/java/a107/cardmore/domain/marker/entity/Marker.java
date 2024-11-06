@@ -3,8 +3,7 @@ package a107.cardmore.domain.marker.entity;
 import a107.cardmore.domain.item.entity.Item;
 import a107.cardmore.domain.user.entity.User;
 import a107.cardmore.util.base.BaseTimeEntity;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,12 +37,11 @@ public class Marker extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonBackReference
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "name", nullable = false, length = 100)
     @Builder.Default
+    @Column(name = "name", nullable = false, length = 100)
     private String name = "";
 
     @Column(name = "poi_id", length = 100)
@@ -70,8 +68,8 @@ public class Marker extends BaseTimeEntity {
     private Boolean isDeleted = false;
 
     @Builder.Default
-    @JsonManagedReference
-    @OneToMany(mappedBy = "marker", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "marker", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> items = new ArrayList<>();
 
     public void updateName(String name){
