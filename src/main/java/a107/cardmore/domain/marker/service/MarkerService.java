@@ -14,6 +14,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -41,7 +42,11 @@ public class MarkerService {
             markers = markerModuleService.findAllByUserAndItemsNameContainingAndIdGreaterThan(user, keyword, lastId, pageable);
             markers.map(marker -> marker.getName().contains(keyword));
         }
-        return markers.map(markerMapper::toMarkerResponseDto);
+        return markers.map(marker -> {
+            MarkerResponseDto responseDto = markerMapper.toMarkerResponseDto(marker);
+            responseDto.getItems().sort(Comparator.comparingInt(item -> item.getId().intValue()));
+            return responseDto;
+        });
     }
 
     public Slice<MarkerResponseDto> getUnfinishedMarkersByKeyword(String email, String keyword, Long lastId, int limit) {
@@ -60,7 +65,11 @@ public class MarkerService {
             markers.map(marker -> marker.getName().contains(keyword));
         }
         markers.forEach(marker -> marker.getItems().removeIf(Item::getIsDone));
-        return markers.map(markerMapper::toMarkerResponseDto);
+        return markers.map(marker -> {
+            MarkerResponseDto responseDto = markerMapper.toMarkerResponseDto(marker);
+            responseDto.getItems().sort(Comparator.comparingInt(item -> item.getId().intValue()));
+            return responseDto;
+        });
     }
 
     @Transactional
