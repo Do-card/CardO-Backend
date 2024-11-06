@@ -12,36 +12,91 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface MarkerRepository extends JpaRepository<Marker, Long> {
-    
-    @EntityGraph(attributePaths = {"items"})
-    Slice<Marker> findAllByUserAndIdGreaterThan(User user, Long lastId, Pageable pageable);
 
+    // 즐겨찾기된 전체 마커 조회
+    @Query("""
+        SELECT DISTINCT m
+        FROM Marker m
+        WHERE m.user = :user AND
+              m.isFavorite = true
+    """)
+    List<Marker> findAllByUserAndIsFavoriteTrue(@Param("user") User user);
+
+    // 즐겨찾기된 미완료 마커 조회
     @EntityGraph(attributePaths = {"items"})
     @Query("""
         SELECT DISTINCT m
-        FROM Marker m JOIN m.items i
+        FROM Marker m LEFT JOIN m.items i
         WHERE m.user = :user AND
-              i.name LIKE %:keyword% AND
-              m.id > :lastId
+              m.isFavorite = true AND
+              (SIZE(m.items) = 0 OR i.isDone = false)
     """)
-    Slice<Marker> findAllByUserAndItemsNameContainingAndIdGreaterThan(User user, String keyword, Long lastId, Pageable pageable);
+    List<Marker> findAllByUserAndIsFavoriteTrueAndItemsIsDoneFalse(@Param("user") User user);
 
-    @EntityGraph(attributePaths = {"items"})
+    // 즐겨찾기 안된 전체 마커 무한 스크롤 조회
     @Query("""
         SELECT DISTINCT m
-        FROM Marker m JOIN m.items i
+        FROM Marker m
         WHERE m.user = :user AND
-              i.name LIKE %:keyword% AND
-              i.isDone = false AND
+              m.isFavorite = false AND
               m.id > :lastId
     """)
-    Slice<Marker> findByUserAndItemsNameContainingAndIsDoneFalseAndMarkerIdGreaterThan(
+    Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdGreaterThan(
             @Param("user") User user,
-            @Param("keyword") String keyword,
             @Param("lastId") Long lastId,
             Pageable pageable
     );
 
+    // 전체 마커 무한 스크롤 검색 결과 조회
+    @EntityGraph(attributePaths = {"items"})
+    @Query("""
+        SELECT DISTINCT m
+        FROM Marker m JOIN m.items i
+        WHERE m.user = :user AND
+              m.id > :lastId AND
+              i.name LIKE %:keyword%
+    """)
+    Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdGreaterThanAndItemsNameContaining(
+            @Param("user") User user,
+            @Param("lastId") Long lastId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    // 즐겨찾기 안된 미완료 마커 무한 스크롤 조회
+    @EntityGraph(attributePaths = {"items"})
+    @Query("""
+        SELECT DISTINCT m
+        FROM Marker m LEFT JOIN m.items i
+        WHERE m.user = :user AND
+              m.isFavorite = false AND
+              (SIZE(m.items) = 0 OR i.isDone = false) AND
+              m.id > :lastId
+    """)
+    Slice<Marker> findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThan(
+            @Param("user") User user,
+            @Param("lastId") Long lastId,
+            Pageable pageable
+    );
+
+    // 미완료 마커 무한 스크롤 검색 결과 조회
+    @EntityGraph(attributePaths = {"items"})
+    @Query("""
+        SELECT DISTINCT m
+        FROM Marker m JOIN m.items i
+        WHERE m.user = :user AND
+              i.isDone = false AND
+              m.id > :lastId AND
+              i.name LIKE %:keyword%
+    """)
+    Slice<Marker> findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThanAndItemsNameContaining(
+            @Param("user") User user,
+            @Param("lastId") Long lastId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = {"items"})
     @Query("""
         SELECT DISTINCT m
         FROM Marker m JOIN m.items i
