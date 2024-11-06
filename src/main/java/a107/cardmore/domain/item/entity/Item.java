@@ -33,9 +33,9 @@ public class Item extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "marker_id", nullable = false)
-    @JsonBackReference
     private Marker marker;
 
     @Column(name = "name", nullable = false, length = 100)
@@ -47,12 +47,12 @@ public class Item extends BaseTimeEntity {
     @Column(name = "category", nullable = false, length = 100)
     private String category;
 
-    @Column(name = "is_done", nullable = false)
     @Builder.Default
+    @Column(name = "is_done", nullable = false)
     private Boolean isDone = false;
 
-    @Column(nullable = false)
     @Builder.Default
+    @Column(nullable = false)
     private Boolean isDeleted = false;
 
     public void update(ItemRequestDto itemRequestDto){
