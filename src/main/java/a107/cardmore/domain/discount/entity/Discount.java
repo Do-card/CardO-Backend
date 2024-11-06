@@ -3,11 +3,9 @@ package a107.cardmore.domain.discount.entity;
 import a107.cardmore.domain.card.entity.Card;
 import a107.cardmore.domain.user.entity.User;
 import a107.cardmore.util.base.BaseTimeEntity;
-import a107.cardmore.util.constant.MerchantCategory;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -37,10 +35,12 @@ public class Discount extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(nullable = false)
     private Card card;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(nullable = false)
     private User user;

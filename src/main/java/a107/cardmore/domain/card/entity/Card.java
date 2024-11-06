@@ -2,8 +2,9 @@ package a107.cardmore.domain.card.entity;
 
 import a107.cardmore.domain.company.entity.Company;
 import a107.cardmore.domain.discount.entity.Discount;
-import a107.cardmore.domain.item.entity.Item;
 import a107.cardmore.util.base.BaseTimeEntity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,6 +39,7 @@ public class Card extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(nullable = false)
     private Company company;
@@ -66,16 +68,17 @@ public class Card extends BaseTimeEntity {
     @Column
     private String colorTitle;
 
-    @Column(nullable = false)
     @Builder.Default
+    @Column(nullable = false)
     private Boolean isSelected = false;
 
-    @Column(nullable = false)
     @Builder.Default
+    @Column(nullable = false)
     private Boolean isDeleted = false;
 
-    @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @JsonManagedReference
+    @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Discount> discounts = new ArrayList<>();
 
     public void changeIsSelected(Boolean isSelected) {

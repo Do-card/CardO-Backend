@@ -29,7 +29,7 @@ public class Bank extends BaseTimeEntity {
     @Column(nullable = false)
     private String accountNo;
 
-    @Column(nullable = false)
     @Builder.Default
+    @Column(nullable = false)
     private Boolean isDeleted = false;
 }

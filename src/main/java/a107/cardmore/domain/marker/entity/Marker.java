@@ -69,9 +69,9 @@ public class Marker extends BaseTimeEntity {
     @Builder.Default
     private Boolean isDeleted = false;
 
-    @OneToMany(mappedBy = "marker", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     @JsonManagedReference
+    @OneToMany(mappedBy = "marker", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> items = new ArrayList<>();
 
     public void updateName(String name){
