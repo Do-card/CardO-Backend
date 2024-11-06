@@ -18,6 +18,18 @@ public class MarkerController {
 
     private final MarkerService markerService;
 
+    @GetMapping("/favorite/all")
+    public BaseSuccessResponse<List<MarkerResponseDto>> getAllFavoriteMarkers(){
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        return new BaseSuccessResponse<>(markerService.getAllFavoriteMarkers(userEmail));
+    }
+
+    @GetMapping("/favorite")
+    public BaseSuccessResponse<List<MarkerResponseDto>> getUnfinishedFavoriteMarkers(){
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        return new BaseSuccessResponse<>(markerService.getUnfinishedFavoriteMarkers(userEmail));
+    }
+
     @GetMapping("/all")
     public BaseSuccessResponse<Slice<MarkerResponseDto>> getAllMarkersByKeyword(
             @RequestParam(required = false) String keyword,

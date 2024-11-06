@@ -1,5 +1,6 @@
 package a107.cardmore.domain.marker.service;
 
+import a107.cardmore.domain.item.entity.Item;
 import a107.cardmore.domain.marker.dto.MarkerCreateRequestDto;
 import a107.cardmore.domain.marker.entity.Marker;
 import a107.cardmore.domain.marker.repository.MarkerRepository;
@@ -49,16 +50,44 @@ public class MarkerModuleService {
                 .orElseThrow(() -> new BadRequestException("존재하지 않는 마커입니다."));
     }
 
-    public Slice<Marker> findAllByUserAndIdGreaterThan(User user, Long lastId, Pageable pageable){
-        return markerRepository.findAllByUserAndIdGreaterThan(user, lastId, pageable);
+    // 즐겨찾기된 전체 마커 조회
+    public List<Marker> findAllByUserAndIsFavoriteTrue(User user) {
+        return markerRepository.findAllByUserAndIsFavoriteTrue(user);
     }
 
-    public Slice<Marker> findAllByUserAndItemsNameContainingAndIdGreaterThan(User user, String keyword, Long lastId, Pageable pageable) {
-        return markerRepository.findAllByUserAndItemsNameContainingAndIdGreaterThan(user, keyword, lastId, pageable);
+    // 즐겨찾기된 미완료 마커 조회
+    public List<Marker> findAllByUserAndIsFavoriteTrueAndItemsIsDoneFalse(User user) {
+        List<Marker> markers = markerRepository.findAllByUserAndIsFavoriteTrueAndItemsIsDoneFalse(user);
+        markers.forEach(marker -> marker.getItems().removeIf(Item::getIsDone));
+        return markers;
     }
 
-    public Slice<Marker> findByUserAndItemsNameContainingAndIsDoneFalseAndMarkerIdGreaterThan(User user, String keyword, Long lastId, Pageable pageable){
-        return markerRepository.findByUserAndItemsNameContainingAndIsDoneFalseAndMarkerIdGreaterThan(user, keyword, lastId, pageable);
+    // 즐겨찾기 안된 전체 마커 무한 스크롤 조회
+    public Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdGreaterThan(User user, Long lastId, Pageable pageable){
+        return markerRepository.findAllByUserAndIsFavoriteFalseAndIdGreaterThan(user, lastId, pageable);
+    }
+
+    // 전체 마커 무한 스크롤 검색 결과 조회
+    public Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdGreaterThanAndItemsNameContaining(User user, String keyword, Long lastId, Pageable pageable) {
+        Slice<Marker> markers = markerRepository.findAllByUserAndIsFavoriteFalseAndIdGreaterThanAndItemsNameContaining(user, lastId, keyword, pageable);
+        markers.forEach(marker ->
+                marker.getItems().removeIf(item -> item.getIsDone() || !item.getName().contains(keyword)));
+        return markers;
+    }
+
+    // 즐겨찾기 안된 미완료 마커 무한 스크롤 조회
+    public Slice<Marker> findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThan(User user, Long lastId, Pageable pageable){
+        Slice<Marker> markers = markerRepository.findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThan(user, lastId, pageable);
+        markers.forEach(marker -> marker.getItems().removeIf(Item::getIsDone));
+        return markers;
+    }
+
+    // 미완료 마커 무한 스크롤 검색 결과 조회
+    public Slice<Marker> findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThanAndItemsNameContaining(User user, String keyword, Long lastId, Pageable pageable){
+        Slice<Marker> markers = markerRepository.findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThanAndItemsNameContaining(user, lastId, keyword, pageable);
+        markers.forEach(marker ->
+                marker.getItems().removeIf(item -> item.getIsDone() || !item.getName().contains(keyword)));
+        return markers;
     }
 
     @Cacheable(value = "nearbyMarkers", key = "#user.id")

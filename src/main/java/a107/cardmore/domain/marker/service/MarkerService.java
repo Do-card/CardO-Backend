@@ -27,6 +27,22 @@ public class MarkerService {
     private final MarkerModuleService markerModuleService;
     private final MarkerMapper markerMapper;
 
+    public List<MarkerResponseDto> getAllFavoriteMarkers(String email){
+        User user = userModuleService.getUserByEmail(email);
+        return markerModuleService.findAllByUserAndIsFavoriteTrue(user)
+                .stream()
+                .map(markerMapper::toMarkerResponseDto)
+                .toList();
+    }
+
+    public List<MarkerResponseDto> getUnfinishedFavoriteMarkers(String email){
+        User user = userModuleService.getUserByEmail(email);
+        return markerModuleService.findAllByUserAndIsFavoriteTrueAndItemsIsDoneFalse(user)
+                .stream()
+                .map(markerMapper::toMarkerResponseDto)
+                .toList();
+    }
+
     public Slice<MarkerResponseDto> getAllMarkersByKeyword(String email, String keyword, Long lastId, int limit) {
         User user = userModuleService.getUserByEmail(email);
         Pageable pageable = PageRequest.of(
@@ -37,10 +53,9 @@ public class MarkerService {
         Slice<Marker> markers;
 
         if (keyword == null || keyword.isEmpty()) {
-            markers = markerModuleService.findAllByUserAndIdGreaterThan(user, lastId, pageable);
+            markers = markerModuleService.findAllByUserAndIsFavoriteFalseAndIdGreaterThan(user, lastId, pageable);
         } else {
-            markers = markerModuleService.findAllByUserAndItemsNameContainingAndIdGreaterThan(user, keyword, lastId, pageable);
-            markers.map(marker -> marker.getName().contains(keyword));
+            markers = markerModuleService.findAllByUserAndIsFavoriteFalseAndIdGreaterThanAndItemsNameContaining(user, keyword, lastId, pageable);
         }
         return markers.map(marker -> {
             MarkerResponseDto responseDto = markerMapper.toMarkerResponseDto(marker);
@@ -59,12 +74,10 @@ public class MarkerService {
         Slice<Marker> markers;
 
         if (keyword == null || keyword.isEmpty()) {
-            markers = markerModuleService.findAllByUserAndIdGreaterThan(user, lastId, pageable);
+            markers = markerModuleService.findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThan(user, lastId, pageable);
         } else {
-            markers = markerModuleService.findByUserAndItemsNameContainingAndIsDoneFalseAndMarkerIdGreaterThan(user, keyword, lastId, pageable);
-            markers.map(marker -> marker.getName().contains(keyword));
+            markers = markerModuleService.findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThanAndItemsNameContaining(user, keyword, lastId, pageable);
         }
-        markers.forEach(marker -> marker.getItems().removeIf(Item::getIsDone));
         return markers.map(marker -> {
             MarkerResponseDto responseDto = markerMapper.toMarkerResponseDto(marker);
             responseDto.getItems().sort(Comparator.comparingInt(item -> item.getId().intValue()));
