@@ -37,6 +37,7 @@ public class MarkerModuleService {
         Marker marker = Marker.builder()
                 .user(user)
                 .name(requestDto.getName())
+                .colorBackground(requestDto.getColorBackground())
                 .build();
         return saveMarker(marker);
     }

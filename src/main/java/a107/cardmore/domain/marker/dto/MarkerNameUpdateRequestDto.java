@@ -10,5 +10,4 @@ import lombok.*;
 @NoArgsConstructor
 public class MarkerNameUpdateRequestDto {
     private String name;
-    private String colorBackground;
 }
