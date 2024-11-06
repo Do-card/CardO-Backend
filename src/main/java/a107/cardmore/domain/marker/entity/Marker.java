@@ -1,6 +1,7 @@
 package a107.cardmore.domain.marker.entity;
 
 import a107.cardmore.domain.item.entity.Item;
+import a107.cardmore.domain.marker.dto.MarkerLocationUpdateRequestDto;
 import a107.cardmore.domain.user.entity.User;
 import a107.cardmore.util.base.BaseTimeEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -76,10 +77,11 @@ public class Marker extends BaseTimeEntity {
         this.name = name;
     }
 
-    public void updateLocation(String poiId,Double latitude, Double longitude){
-        this.poiId = poiId;
-        this.latitude = latitude;
-        this.longitude = longitude;
+    public void updateLocation(MarkerLocationUpdateRequestDto requestDto){
+        this.poiId = requestDto.getPoiId();
+        this.poiName = requestDto.getPoiName();
+        this.latitude = requestDto.getLatitude();
+        this.longitude = requestDto.getLongitude();
     }
 
     public void updateFavorite(Boolean isFavorite){

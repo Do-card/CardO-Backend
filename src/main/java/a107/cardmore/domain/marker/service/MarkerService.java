@@ -72,7 +72,7 @@ public class MarkerService {
     @Transactional
     public MarkerResponseDto updateMarkerLocation(String email, long markerId, MarkerLocationUpdateRequestDto requestDto){
         Marker marker = getValidatedMarker(email, markerId);
-        marker.updateLocation(requestDto.getPoiId(), requestDto.getLatitude(), requestDto.getLongitude());
+        marker.updateLocation(requestDto);
         return markerMapper.toMarkerResponseDto(markerModuleService.saveMarker(marker));
     }
 
