@@ -28,7 +28,11 @@ public class MarkerService {
 
     public Slice<MarkerResponseDto> getAllMarkersByKeyword(String email, String keyword, Long lastId, int limit) {
         User user = userModuleService.getUserByEmail(email);
-        Pageable pageable = PageRequest.of(0, limit);
+        Pageable pageable = PageRequest.of(
+                0,
+                limit,
+                Sort.by(Sort.Order.desc("isFavorite"), Sort.Order.asc("id"))
+        );
         Slice<Marker> markers;
 
         if (keyword == null || keyword.isEmpty()) {
@@ -42,7 +46,11 @@ public class MarkerService {
 
     public Slice<MarkerResponseDto> getUnfinishedMarkersByKeyword(String email, String keyword, Long lastId, int limit) {
         User user = userModuleService.getUserByEmail(email);
-        Pageable pageable = PageRequest.of(0, limit);
+        Pageable pageable = PageRequest.of(
+                0,
+                limit,
+                Sort.by(Sort.Order.desc("isFavorite"), Sort.Order.asc("id"))
+        );
         Slice<Marker> markers;
 
         if (keyword == null || keyword.isEmpty()) {
