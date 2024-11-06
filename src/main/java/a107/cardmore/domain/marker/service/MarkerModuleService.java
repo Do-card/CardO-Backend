@@ -28,11 +28,12 @@ public class MarkerModuleService {
         return markerRepository.save(marker);
     }
 
-    @CacheEvict(value = {"marker", "markerList"}, key = "#marker.id")
+    @CacheEvict(value = "marker", key = "#marker.id")
     public void deleteMarker(Marker marker){
         markerRepository.delete(marker);
     }
 
+    @CacheEvict(value = "nearbyMarkers", key = "#user.id", allEntries = true)
     public Marker createMarker(User user, MarkerCreateRequestDto requestDto) {
         Marker marker = Marker.builder()
                 .user(user)

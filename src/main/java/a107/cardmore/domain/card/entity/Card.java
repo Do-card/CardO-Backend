@@ -76,11 +76,6 @@ public class Card extends BaseTimeEntity {
     @Column(nullable = false)
     private Boolean isDeleted = false;
 
-    @Builder.Default
-    @JsonManagedReference
-    @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Discount> discounts = new ArrayList<>();
-
     public void changeIsSelected(Boolean isSelected) {
         this.isSelected = isSelected;
     }

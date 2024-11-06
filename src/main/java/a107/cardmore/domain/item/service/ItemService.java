@@ -32,7 +32,7 @@ public class ItemService {
             throw new BadRequestException("해당 유저의 마커가 아닙니다.");
         }
         Item item = itemMapper.toItem(itemRequestDto);
-        item.updateMarker(markerModuleService.findById(itemRequestDto.getMarkerId()));
+        item.updateMarker(marker);
 
         CategoryResponseDto categories = categoryService.getAiPredictResponse(item.getName());
         item.updateCategory(categories.getMajorCategory(), categories.getSubCategory());

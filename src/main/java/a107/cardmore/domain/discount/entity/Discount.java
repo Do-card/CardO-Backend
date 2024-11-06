@@ -35,7 +35,6 @@ public class Discount extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonBackReference
     @ManyToOne
     @JoinColumn(nullable = false)
     private Card card;

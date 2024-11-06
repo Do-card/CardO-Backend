@@ -56,18 +56,6 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private Boolean isDeleted = false;
 
-    @Builder.Default
-    @JsonManagedReference
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Marker> markers = new ArrayList<>();
-
-    @Builder.Default
-    @JsonManagedReference
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Company> companies = new ArrayList<>();
-
-
-
     public User(String username, String password, String role) {
         this.password = password;
         this.email = username;
