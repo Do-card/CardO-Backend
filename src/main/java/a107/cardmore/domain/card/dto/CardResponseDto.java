@@ -49,7 +49,8 @@ public class CardResponseDto {
         this.isSelected = card.getIsSelected();
         this.limitRemaining = card.getLimitRemaining();
         this.performanceRemaining = card.getPerformanceRemaining();
+        this.cardBenefits = new ArrayList<>();
         cardProduct.getCardBenefitsInfo().forEach(benefitsInfo ->
-                this.cardBenefits.add(new CardBenefitResponseDto(benefitsInfo)));
+        this.cardBenefits.add(new CardBenefitResponseDto(benefitsInfo)));
     }
 }
