@@ -67,3 +67,11 @@ logging:
     org.springframework.data.elasticsearch.client: DEBUG
     org.elasticsearch.client: DEBUG
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  endpoint:
+    prometheus:
+      enabled: true
