@@ -22,17 +22,6 @@ public interface MarkerRepository extends JpaRepository<Marker, Long> {
     """)
     List<Marker> findAllByUserAndIsFavoriteTrue(@Param("user") User user);
 
-    // 즐겨찾기된 미완료 마커 조회
-    @EntityGraph(attributePaths = {"items"})
-    @Query("""
-        SELECT DISTINCT m
-        FROM Marker m LEFT JOIN m.items i
-        WHERE m.user = :user AND
-              m.isFavorite = true AND
-              (SIZE(m.items) = 0 OR i.isDone = false)
-    """)
-    List<Marker> findAllByUserAndIsFavoriteTrueAndItemsIsDoneFalse(@Param("user") User user);
-
     // 즐겨찾기 안된 전체 마커 무한 스크롤 조회
     @Query("""
         SELECT DISTINCT m
@@ -51,45 +40,12 @@ public interface MarkerRepository extends JpaRepository<Marker, Long> {
     @EntityGraph(attributePaths = {"items"})
     @Query("""
         SELECT DISTINCT m
-        FROM Marker m JOIN m.items i
-        WHERE m.user = :user AND
-              m.id > :lastId AND
-              i.name LIKE %:keyword%
-    """)
-    Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdGreaterThanAndItemsNameContaining(
-            @Param("user") User user,
-            @Param("lastId") Long lastId,
-            @Param("keyword") String keyword,
-            Pageable pageable
-    );
-
-    // 즐겨찾기 안된 미완료 마커 무한 스크롤 조회
-    @EntityGraph(attributePaths = {"items"})
-    @Query("""
-        SELECT DISTINCT m
         FROM Marker m LEFT JOIN m.items i
         WHERE m.user = :user AND
-              m.isFavorite = false AND
-              (SIZE(m.items) = 0 OR i.isDone = false) AND
-              m.id > :lastId
-    """)
-    Slice<Marker> findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThan(
-            @Param("user") User user,
-            @Param("lastId") Long lastId,
-            Pageable pageable
-    );
-
-    // 미완료 마커 무한 스크롤 검색 결과 조회
-    @EntityGraph(attributePaths = {"items"})
-    @Query("""
-        SELECT DISTINCT m
-        FROM Marker m JOIN m.items i
-        WHERE m.user = :user AND
-              i.isDone = false AND
               m.id > :lastId AND
-              i.name LIKE %:keyword%
+              (SIZE(m.items) = 0 OR i.name LIKE %:keyword%)
     """)
-    Slice<Marker> findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThanAndItemsNameContaining(
+    Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdGreaterThanAndItemsNameContaining(
             @Param("user") User user,
             @Param("lastId") Long lastId,
             @Param("keyword") String keyword,

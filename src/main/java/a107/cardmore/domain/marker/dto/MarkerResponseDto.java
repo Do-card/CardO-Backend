@@ -22,6 +22,7 @@ public class MarkerResponseDto {
     private Double longitude;
     private String colorBackground;
     private Boolean isFavorite;
+    private Boolean isComplete;
     private LocalDateTime created;
     private LocalDateTime updated;
     private List<ItemResponseDto> items;

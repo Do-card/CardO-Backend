@@ -55,13 +55,6 @@ public class MarkerModuleService {
         return markerRepository.findAllByUserAndIsFavoriteTrue(user);
     }
 
-    // 즐겨찾기된 미완료 마커 조회
-    public List<Marker> findAllByUserAndIsFavoriteTrueAndItemsIsDoneFalse(User user) {
-        List<Marker> markers = markerRepository.findAllByUserAndIsFavoriteTrueAndItemsIsDoneFalse(user);
-        markers.forEach(marker -> marker.getItems().removeIf(Item::getIsDone));
-        return markers;
-    }
-
     // 즐겨찾기 안된 전체 마커 무한 스크롤 조회
     public Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdGreaterThan(User user, Long lastId, Pageable pageable){
         return markerRepository.findAllByUserAndIsFavoriteFalseAndIdGreaterThan(user, lastId, pageable);
@@ -70,23 +63,7 @@ public class MarkerModuleService {
     // 전체 마커 무한 스크롤 검색 결과 조회
     public Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdGreaterThanAndItemsNameContaining(User user, String keyword, Long lastId, Pageable pageable) {
         Slice<Marker> markers = markerRepository.findAllByUserAndIsFavoriteFalseAndIdGreaterThanAndItemsNameContaining(user, lastId, keyword, pageable);
-        markers.forEach(marker ->
-                marker.getItems().removeIf(item -> item.getIsDone() || !item.getName().contains(keyword)));
-        return markers;
-    }
-
-    // 즐겨찾기 안된 미완료 마커 무한 스크롤 조회
-    public Slice<Marker> findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThan(User user, Long lastId, Pageable pageable){
-        Slice<Marker> markers = markerRepository.findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThan(user, lastId, pageable);
-        markers.forEach(marker -> marker.getItems().removeIf(Item::getIsDone));
-        return markers;
-    }
-
-    // 미완료 마커 무한 스크롤 검색 결과 조회
-    public Slice<Marker> findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThanAndItemsNameContaining(User user, String keyword, Long lastId, Pageable pageable){
-        Slice<Marker> markers = markerRepository.findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThanAndItemsNameContaining(user, lastId, keyword, pageable);
-        markers.forEach(marker ->
-                marker.getItems().removeIf(item -> item.getIsDone() || !item.getName().contains(keyword)));
+        markers.forEach(marker -> marker.getItems().removeIf(item -> !item.getName().contains(keyword)));
         return markers;
     }
 

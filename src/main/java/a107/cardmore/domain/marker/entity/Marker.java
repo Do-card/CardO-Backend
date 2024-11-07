@@ -64,6 +64,10 @@ public class Marker extends BaseTimeEntity {
     @Builder.Default
     private Boolean isFavorite = false;
 
+    @Column(name = "is_complete", nullable = false)
+    @Builder.Default
+    private Boolean isComplete = false;
+
     @Column(nullable = false)
     @Builder.Default
     private Boolean isDeleted = false;
@@ -86,6 +90,10 @@ public class Marker extends BaseTimeEntity {
 
     public void updateFavorite(Boolean isFavorite){
         this.isFavorite = isFavorite;
+    }
+
+    public void updateComplete(Boolean isComplete){
+        this.isComplete = isComplete;
     }
 
 }

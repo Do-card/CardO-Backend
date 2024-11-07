@@ -24,12 +24,6 @@ public class MarkerController {
         return new BaseSuccessResponse<>(markerService.getAllFavoriteMarkers(userEmail));
     }
 
-    @GetMapping("/favorite")
-    public BaseSuccessResponse<List<MarkerResponseDto>> getUnfinishedFavoriteMarkers(){
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        return new BaseSuccessResponse<>(markerService.getUnfinishedFavoriteMarkers(userEmail));
-    }
-
     @GetMapping("/all")
     public BaseSuccessResponse<Slice<MarkerResponseDto>> getAllMarkersByKeyword(
             @RequestParam(required = false) String keyword,
@@ -39,15 +33,6 @@ public class MarkerController {
         return new BaseSuccessResponse<>(markerService.getAllMarkersByKeyword(userEmail, keyword, lastId, limit));
     }
 
-    @GetMapping
-    public BaseSuccessResponse<Slice<MarkerResponseDto>> getUnfinishedMarkersByKeyword(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "0", required = false) Long lastId,
-            @RequestParam(defaultValue = "10", required = false) int limit) {
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        return new BaseSuccessResponse<>(markerService.getUnfinishedMarkersByKeyword(userEmail, keyword, lastId, limit));
-    }
-
     @PostMapping
     public BaseSuccessResponse<MarkerResponseDto> createMarker(@RequestBody MarkerCreateRequestDto requestDto){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -55,7 +40,7 @@ public class MarkerController {
     }
 
     @PatchMapping("/{id}/style")
-    public BaseSuccessResponse<MarkerResponseDto> updateMarkerStyle(@PathVariable("id") long markerId, @RequestBody MarkerNameUpdateRequestDto requestDto){
+    public BaseSuccessResponse<MarkerResponseDto> updateMarkerName(@PathVariable("id") long markerId, @RequestBody MarkerNameUpdateRequestDto requestDto){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         return new BaseSuccessResponse<>(markerService.updateMarkerName(userEmail, markerId, requestDto));
     }
