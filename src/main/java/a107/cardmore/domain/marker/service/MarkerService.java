@@ -35,14 +35,6 @@ public class MarkerService {
                 .toList();
     }
 
-    public List<MarkerResponseDto> getUnfinishedFavoriteMarkers(String email){
-        User user = userModuleService.getUserByEmail(email);
-        return markerModuleService.findAllByUserAndIsFavoriteTrueAndItemsIsDoneFalse(user)
-                .stream()
-                .map(markerMapper::toMarkerResponseDto)
-                .toList();
-    }
-
     public Slice<MarkerResponseDto> getAllMarkersByKeyword(String email, String keyword, Long lastId, int limit) {
         User user = userModuleService.getUserByEmail(email);
         Pageable pageable = PageRequest.of(
@@ -56,27 +48,6 @@ public class MarkerService {
             markers = markerModuleService.findAllByUserAndIsFavoriteFalseAndIdGreaterThan(user, lastId, pageable);
         } else {
             markers = markerModuleService.findAllByUserAndIsFavoriteFalseAndIdGreaterThanAndItemsNameContaining(user, keyword, lastId, pageable);
-        }
-        return markers.map(marker -> {
-            MarkerResponseDto responseDto = markerMapper.toMarkerResponseDto(marker);
-            responseDto.getItems().sort(Comparator.comparingInt(item -> item.getId().intValue()));
-            return responseDto;
-        });
-    }
-
-    public Slice<MarkerResponseDto> getUnfinishedMarkersByKeyword(String email, String keyword, Long lastId, int limit) {
-        User user = userModuleService.getUserByEmail(email);
-        Pageable pageable = PageRequest.of(
-                0,
-                limit,
-                Sort.by(Sort.Order.desc("isFavorite"), Sort.Order.asc("id"))
-        );
-        Slice<Marker> markers;
-
-        if (keyword == null || keyword.isEmpty()) {
-            markers = markerModuleService.findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThan(user, lastId, pageable);
-        } else {
-            markers = markerModuleService.findByUserAndIsFavoriteFalseAndItemsIsDoneFalseAndIdGreaterThanAndItemsNameContaining(user, keyword, lastId, pageable);
         }
         return markers.map(marker -> {
             MarkerResponseDto responseDto = markerMapper.toMarkerResponseDto(marker);
