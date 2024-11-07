@@ -36,6 +36,7 @@ public class ItemService {
 
         CategoryResponseDto categories = categoryService.getAiPredictResponse(item.getName());
         item.updateCategory(categories.getMajorCategory(), categories.getSubCategory());
+        checkCompletion(item.getMarker());
         return itemMapper.toItemResponseDto(itemModuleService.save(item));
     }
 
@@ -60,6 +61,7 @@ public class ItemService {
             throw new BadRequestException("해당 유저의 마커가 아닙니다.");
         }
         item.changeState();
+        checkCompletion(item.getMarker());
         return itemMapper.toItemResponseDto(itemModuleService.save(item));
     }
 
@@ -72,6 +74,25 @@ public class ItemService {
             throw new BadRequestException("해당 유저의 마커가 아닙니다.");
         }
         itemModuleService.delete(id);
+        checkCompletion(item.getMarker());
+        markerModuleService.saveMarker(marker);
+    }
+
+    private void checkCompletion(Marker marker) {
+        boolean isComplete = true;
+
+        if (marker.getItems().isEmpty()){
+            marker.updateComplete(false);
+            return;
+        }
+
+        for (Item item : marker.getItems()){
+            if (!item.getIsDone()){
+                isComplete = false;
+                break;
+            }
+        }
+        marker.updateComplete(isComplete);
     }
 
 }
