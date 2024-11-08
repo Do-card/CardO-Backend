@@ -634,19 +634,6 @@ public class RestTemplateUtil {
                 String newAccessToken = refreshAccessToken();
                 fcmAccessTokenRedisRepository.saveAccessToken(newAccessToken);
 
-                // 재시도
-                restTemplate.exchange(
-                        FCMURL,
-                        HttpMethod.POST,
-                        getEntity(markerList, newAccessToken),
-                        new ParameterizedTypeReference<>() {}
-                );
-            }
-            throw e;
-        }
-    }
-
-    private Message getMessage(MarkerResponseDto markerList) {
         Message message = new Message();
         FCMData data = new FCMData();
         Notification notification = new Notification();
