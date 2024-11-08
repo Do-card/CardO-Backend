@@ -13,13 +13,12 @@ import a107.cardmore.global.exception.BadRequestException;
 import a107.cardmore.util.api.RestTemplateUtil;
 import a107.cardmore.util.api.dto.card.CardProductResponseRestTemplateDto;
 import a107.cardmore.util.api.dto.card.CardResponseRestTemplateDto;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -125,5 +124,21 @@ public class CardService {
             }
             card.changeIsRepresentativeSelected(cardRepresentativeRequestDto.isRepresentativeSelected());
         }
+    }
+
+    public CardResponseDto getUserRepresentativeCard(String userEmail) {
+        User user = userModuleService.getUserByEmail(userEmail);
+        List<Card> userCard = cardModuleService.findSelectedCardsByUser(user);
+        List<CardProductResponseRestTemplateDto> cards = restTemplateUtil.inquireCreditCardList();
+
+        for(Card card : userCard){
+            if(!card.getIsSelected()) continue;
+            for(CardProductResponseRestTemplateDto restCard : cards){
+                if(restCard.getCardUniqueNo().equals(card.getCardUniqueNo()) && card.getIsRepresentativeSelected()){
+                   return new CardResponseDto(card, restCard);
+                }
+            }
+        }
+        return null;
     }
 }

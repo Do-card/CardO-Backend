@@ -60,6 +60,12 @@ public class CardController {
         return new BaseSuccessResponse<>(null);
     }
 
+    @GetMapping("/representative")
+    public BaseSuccessResponse<CardResponseDto> getUserRepresentativeCard(){
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        return new BaseSuccessResponse<>(cardService.getUserRepresentativeCard(userEmail));
+    }
+
 
 
 }
