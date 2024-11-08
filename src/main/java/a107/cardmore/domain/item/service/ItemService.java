@@ -1,6 +1,5 @@
 package a107.cardmore.domain.item.service;
 
-import a107.cardmore.domain.category.dto.CategoryResponseDto;
 import a107.cardmore.domain.category.service.CategoryService;
 import a107.cardmore.domain.item.dto.ItemRequestDto;
 import a107.cardmore.domain.item.dto.ItemResponseDto;
@@ -33,11 +32,12 @@ public class ItemService {
         }
         Item item = itemMapper.toItem(itemRequestDto);
         item.updateMarker(marker);
-
-        CategoryResponseDto categories = categoryService.getAiPredictResponse(item.getName());
-        item.updateCategory(categories.getMajorCategory(), categories.getSubCategory());
         checkCompletion(item.getMarker());
-        return itemMapper.toItemResponseDto(itemModuleService.save(item));
+        item = itemModuleService.save(item);
+
+        //비동기 카테고리 처리
+        categoryService.setCategory(item);
+        return itemMapper.toItemResponseDto(item);
     }
 
     @Transactional
