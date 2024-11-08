@@ -75,7 +75,6 @@ management:
       enabled: true
 
 fcm:
-  client-id: ${FCM_CLIENT_ID}
-  client-secret: ${FCM_CLIENT_SECRET}
-  refresh-token: ${FCM_REFRESH_TOKEN}
+  private-key: ${FCM_PRIVATE_KEY}
+  client-email: ${FCM_CLIENT_EMAIL}
   token: ${FCM_TOKEN}

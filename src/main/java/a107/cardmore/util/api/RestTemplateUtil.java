@@ -18,21 +18,29 @@ import a107.cardmore.util.api.template.header.RequestHeader;
 import a107.cardmore.util.api.template.response.RECListResponse;
 import a107.cardmore.util.api.template.response.RECResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
 @Slf4j
@@ -41,6 +49,7 @@ import java.util.UUID;
 public class RestTemplateUtil {
 
     private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
     private final FcmAccessTokenRedisRepository fcmAccessTokenRedisRepository;
 
     @Value("${fintech.api.url}")
@@ -52,14 +61,12 @@ public class RestTemplateUtil {
     @Value("${fintech.institution.code}")
     private String institutionCode;
 
-    @Value("${fcm.refresh-token}")
-    private String fcmRefreshToken;
+    @Value("${fcm.private-key}")
+    private String fcmPrivateKey;
+    @Value("${fcm.client-email}")
+    private String fcmClientEmail;
     @Value("${fcm.token}")
     private String fcmToken;
-    @Value("${fcm.client-id}")
-    private String fcmClientId;
-    @Value("${fcm.client-secret}")
-    private String fcmClientSecret;
 
     //정수형 UUID 생성
     private static String generateNumericUUID() {
@@ -671,19 +678,44 @@ public class RestTemplateUtil {
     }
 
     // FCM OAuth2 토큰 재발급 요청
-    private String refreshAccessToken() {
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                "https://oauth2.googleapis.com/token",
-                new HttpEntity<>(Map.of(
-                        "grant_type", "refresh_token",
-                        "client_id", fcmClientId,
-                        "client_secret", fcmClientSecret,
-                        "refresh_token", fcmRefreshToken
-                )),
-                Map.class
-        );
+    private String refreshAccessToken(){
+        String jwt = createJwt(fcmClientEmail, fcmPrivateKey);
 
-        Map<String, String> responseBody = (Map<String, String>) response.getBody();
-        return responseBody.get("access_token");
+        // JWT를 이용한 Access Token 발급 요청
+        JsonNode response = restTemplate.postForObject(
+                "https://oauth2.googleapis.com/token",
+                Map.of(
+                        "grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer",
+                        "assertion", jwt
+                ),
+                JsonNode.class
+        );
+        return response.get("access_token").asText();
+    }
+
+    private String createJwt(String clientEmail, String privateKeyPem) {
+        try {
+            long now = System.currentTimeMillis();
+            Date expirationTime = new Date(now + TimeUnit.HOURS.toMillis(1));
+
+            String privateKeyContent = privateKeyPem.replaceAll("\\n", "")
+                    .replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----", "");
+            byte[] keyBytes = Base64.getDecoder().decode(privateKeyContent);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+            PrivateKey privateKey = java.security.KeyFactory.getInstance("RSA").generatePrivate(keySpec);
+
+            return Jwts.builder()
+                    .setIssuer(clientEmail)
+                    .setSubject(clientEmail)
+                    .setAudience("https://oauth2.googleapis.com/token")
+                    .setIssuedAt(new Date(now))
+                    .setExpiration(expirationTime)
+                    .claim("scope", "https://www.googleapis.com/auth/firebase.messaging")
+                    .signWith(privateKey, SignatureAlgorithm.RS256)
+                    .compact();
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException ignored){
+            throw new BadRequestException("FCM Access토큰 발급에 실패했습니다.");
+        }
     }
 }
