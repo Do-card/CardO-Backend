@@ -75,3 +75,7 @@ management:
   endpoint:
     prometheus:
       enabled: true
+
+fcm:
+  access-token: ${FCM_ACCESS_TOKEN}
+  token: ${FCM_TOKEN}
