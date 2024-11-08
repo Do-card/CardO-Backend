@@ -8,7 +8,7 @@ import lombok.ToString;
 @Setter
 @lombok.Data
 @ToString
-public class Data {
+public class FCMData {
     String title;
     String message;
     String url;

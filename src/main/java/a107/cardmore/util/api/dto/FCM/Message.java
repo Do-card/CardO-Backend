@@ -1,2 +1,16 @@
-package a107.cardmore.util.api.dto.FCM;public class Message {
+package a107.cardmore.util.api.dto.FCM;
+
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@Data
+@ToString
+public class Message {
+    String token;
+    FCMData data;
+    Notification notification;
 }

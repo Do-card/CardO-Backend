@@ -1,7 +1,12 @@
 package a107.cardmore.util.api;
 
 import a107.cardmore.domain.bank.dto.CreateUserRequestDto;
+import a107.cardmore.domain.fcm.entity.FCM;
+import a107.cardmore.domain.marker.dto.MarkerResponseDto;
 import a107.cardmore.global.exception.BadRequestException;
+import a107.cardmore.util.api.dto.FCM.FCMData;
+import a107.cardmore.util.api.dto.FCM.Message;
+import a107.cardmore.util.api.dto.FCM.Notification;
 import a107.cardmore.util.api.dto.account.CreateAccountResponseRestTemplateDto;
 import a107.cardmore.util.api.dto.account.InquireAccountBalanceResponseRestTemplateDto;
 import a107.cardmore.util.api.dto.auth.CheckAuthCodeResponseRestTemplateDto;
@@ -10,6 +15,7 @@ import a107.cardmore.util.api.dto.card.*;
 import a107.cardmore.util.api.dto.member.CreateMemberRequestRestTemplateDto;
 import a107.cardmore.util.api.dto.member.CreateMemberResponseRestTemplateDto;
 import a107.cardmore.util.api.dto.merchant.MerchantResponseRestTemplateDto;
+import a107.cardmore.util.api.template.header.FCMHeader;
 import a107.cardmore.util.api.template.header.RequestHeader;
 import a107.cardmore.util.api.template.response.RECListResponse;
 import a107.cardmore.util.api.template.response.RECResponse;
@@ -20,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -46,6 +53,11 @@ public class RestTemplateUtil {
     private String fintechAppNo;
     @Value("${fintech.institution.code}")
     private String institutionCode;
+
+    @Value("${fcm.access-token}")
+    private String fcmAccessToken;
+    @Value("${fcm.token}")
+    private String fcmToken;
 
     //정수형 UUID 생성
     private static String generateNumericUUID() {
@@ -589,5 +601,45 @@ public class RestTemplateUtil {
         return response.getBody().getREC();
     }
 
+    //Firebase
+    public void FCMPushMessage(MarkerResponseDto markerList){
+        String FCMURL = "https://fcm.googleapis.com/v1/projects/card-o-ba82e/messages:send";
 
+        Message message = new Message();
+        FCMData data = new FCMData();
+        Notification notification = new Notification();
+
+        data.setUrl("https://k11a402.p.ssafy.io/tmap");
+
+        notification.setTitle(markerList.getPoiName() + "에서 할 일이 있어요");
+
+        if(!markerList.getItems().isEmpty()){
+            notification.setBody(markerList.getItems().get(0).getName() + " 외 " + (markerList.getItems().size() - 1) + "개의 할 일이 있어요");
+        }
+        else{
+            notification.setBody("아직 " + markerList.getPoiName() + "에서 추가된 할 일이 없어요");
+        }
+
+
+        message.setToken(fcmToken);
+        message.setNotification(notification);
+        message.setData(data);
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.set("Authorization", "Bearer " + fcmAccessToken);
+
+        Map<String,Object> requestBody = new HashMap<>();
+        requestBody.put("message",message);
+
+        HttpEntity<Object> entity = new HttpEntity<>(requestBody,headers);
+
+        ResponseEntity<RECListResponse<InquireBillingStatementsResponseRestTemplateDto>> response
+                = restTemplate.exchange(
+                FCMURL, HttpMethod.POST, entity,
+                new ParameterizedTypeReference<>(){}
+        );
+
+        return;
+    }
 }
