@@ -43,7 +43,7 @@ public interface MarkerRepository extends JpaRepository<Marker, Long> {
         FROM Marker m LEFT JOIN m.items i
         WHERE m.user = :user AND
               m.id > :lastId AND
-              (SIZE(m.items) = 0 OR i.name LIKE %:keyword%)
+              (i IS NULL OR i.name LIKE %:keyword%)
     """)
     Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdGreaterThanAndItemsNameContaining(
             @Param("user") User user,
