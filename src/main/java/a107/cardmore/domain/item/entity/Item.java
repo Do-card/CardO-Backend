@@ -63,6 +63,7 @@ public class Item extends BaseTimeEntity {
 
     public void updateMarker(Marker marker) {
         this.marker = marker;
+        marker.addItem(this);
     }
 
     public void updateCategory(String majorCategory, String category) {

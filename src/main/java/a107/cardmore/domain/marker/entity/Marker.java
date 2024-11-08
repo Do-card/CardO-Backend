@@ -96,4 +96,7 @@ public class Marker extends BaseTimeEntity {
         this.isComplete = isComplete;
     }
 
+    public void addItem(Item item){
+        this.getItems().add(item);
+    }
 }
