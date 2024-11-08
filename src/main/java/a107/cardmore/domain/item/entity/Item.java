@@ -39,10 +39,10 @@ public class Item extends BaseTimeEntity {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    @Column(name = "major_category", nullable = false, length = 100)
+    @Column(name = "major_category", length = 100)
     private String majorCategory;
 
-    @Column(name = "category", nullable = false, length = 100)
+    @Column(name = "category", length = 100)
     private String category;
 
     @Builder.Default
