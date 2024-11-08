@@ -30,10 +30,11 @@ public class UserController {
     }
 
     @PostMapping("/position")
-    public BaseSuccessResponse<List<MarkerResponseDto>> userPosition(@RequestBody PositionRequestDto requestDto) {
+    public BaseSuccessResponse<Void> userPosition(@RequestBody PositionRequestDto requestDto) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        userService.checkMarker(userEmail, requestDto);
 
-        return new BaseSuccessResponse<>(userService.checkMarker(userEmail, requestDto));
+        return new BaseSuccessResponse<>(null);
     }
 
     @PostMapping("/token")
