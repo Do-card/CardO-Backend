@@ -1,21 +1,28 @@
 package a107.cardmore.domain.marker.service;
 
-import a107.cardmore.domain.item.entity.Item;
-import a107.cardmore.domain.marker.dto.*;
+import a107.cardmore.domain.item.service.ItemModuleService;
+import a107.cardmore.domain.marker.dto.MarkerCreateRequestDto;
+import a107.cardmore.domain.marker.dto.MarkerFavoriteUpdateRequestDto;
+import a107.cardmore.domain.marker.dto.MarkerLocationUpdateRequestDto;
+import a107.cardmore.domain.marker.dto.MarkerNameUpdateRequestDto;
+import a107.cardmore.domain.marker.dto.MarkerNearbyRequestDto;
+import a107.cardmore.domain.marker.dto.MarkerResponseDto;
 import a107.cardmore.domain.marker.entity.Marker;
 import a107.cardmore.domain.marker.mapper.MarkerMapper;
 import a107.cardmore.domain.user.entity.User;
 import a107.cardmore.domain.user.service.UserModuleService;
 import a107.cardmore.global.exception.BadRequestException;
 import java.util.ArrayList;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.*;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Comparator;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -26,6 +33,7 @@ public class MarkerService {
     private final UserModuleService userModuleService;
     private final MarkerModuleService markerModuleService;
     private final MarkerMapper markerMapper;
+    private final ItemModuleService itemModuleService;
 
     public List<MarkerResponseDto> getAllFavoriteMarkers(String email){
         User user = userModuleService.getUserByEmail(email);
