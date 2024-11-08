@@ -1,8 +1,7 @@
 package a107.cardmore.util.api;
 
-import a107.cardmore.domain.bank.dto.CreateUserRequestDto;
-import a107.cardmore.domain.fcm.entity.FCM;
 import a107.cardmore.domain.marker.dto.MarkerResponseDto;
+import a107.cardmore.domain.redis.FcmAccessTokenRedisRepository;
 import a107.cardmore.global.exception.BadRequestException;
 import a107.cardmore.util.api.dto.FCM.FCMData;
 import a107.cardmore.util.api.dto.FCM.Message;
@@ -15,21 +14,18 @@ import a107.cardmore.util.api.dto.card.*;
 import a107.cardmore.util.api.dto.member.CreateMemberRequestRestTemplateDto;
 import a107.cardmore.util.api.dto.member.CreateMemberResponseRestTemplateDto;
 import a107.cardmore.util.api.dto.merchant.MerchantResponseRestTemplateDto;
-import a107.cardmore.util.api.template.header.FCMHeader;
 import a107.cardmore.util.api.template.header.RequestHeader;
 import a107.cardmore.util.api.template.response.RECListResponse;
 import a107.cardmore.util.api.template.response.RECResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -39,11 +35,13 @@ import java.util.Map;
 import java.util.UUID;
 
 
-@Component
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class RestTemplateUtil {
-    @Autowired
-    private RestTemplate restTemplate;
+
+    private final RestTemplate restTemplate;
+    private final FcmAccessTokenRedisRepository fcmAccessTokenRedisRepository;
 
     @Value("${fintech.api.url}")
     private String url;
@@ -54,10 +52,14 @@ public class RestTemplateUtil {
     @Value("${fintech.institution.code}")
     private String institutionCode;
 
-    @Value("${fcm.access-token}")
-    private String fcmAccessToken;
+    @Value("${fcm.refresh-token}")
+    private String fcmRefreshToken;
     @Value("${fcm.token}")
     private String fcmToken;
+    @Value("${fcm.client-id}")
+    private String fcmClientId;
+    @Value("${fcm.client-secret}")
+    private String fcmClientSecret;
 
     //정수형 UUID 생성
     private static String generateNumericUUID() {
@@ -603,14 +605,46 @@ public class RestTemplateUtil {
 
     //Firebase
     public void FCMPushMessage(MarkerResponseDto markerList){
-        String FCMURL = "https://fcm.googleapis.com/v1/projects/card-o-ba82e/messages:send";
+        final String FCMURL = "https://fcm.googleapis.com/v1/projects/card-o-ba82e/messages:send";
 
+
+        String fcmAccessToken = fcmAccessTokenRedisRepository.getAccessToken();
+        if (fcmAccessToken == null){
+            fcmAccessToken = refreshAccessToken();
+        }
+
+        try {
+//            ResponseEntity<RECListResponse<InquireBillingStatementsResponseRestTemplateDto>> response =
+            restTemplate.exchange(
+                    FCMURL,
+                    HttpMethod.POST,
+                    getEntity(markerList, fcmAccessToken),
+                    new ParameterizedTypeReference<>() {}
+            );
+        } catch (HttpClientErrorException e){
+            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                // Access Token 만료 -> Refresh Token으로 재발급
+                String newAccessToken = refreshAccessToken();
+                fcmAccessTokenRedisRepository.saveAccessToken(newAccessToken);
+
+                // 재시도
+                restTemplate.exchange(
+                        FCMURL,
+                        HttpMethod.POST,
+                        getEntity(markerList, newAccessToken),
+                        new ParameterizedTypeReference<>() {}
+                );
+            }
+            throw e;
+        }
+    }
+
+    private Message getMessage(MarkerResponseDto markerList) {
         Message message = new Message();
         FCMData data = new FCMData();
         Notification notification = new Notification();
 
         data.setUrl("https://k11a402.p.ssafy.io/map");
-
         notification.setTitle(markerList.getPoiName() + "에서 할 일이 있어요");
 
         if(!markerList.getItems().isEmpty()){
@@ -620,26 +654,36 @@ public class RestTemplateUtil {
             notification.setBody("아직 " + markerList.getPoiName() + "에서 추가된 할 일이 없어요");
         }
 
-
         message.setToken(fcmToken);
         message.setNotification(notification);
         message.setData(data);
+        return message;
+    }
 
+    private HttpEntity<Object> getEntity(MarkerResponseDto markerList, String accessToken){
         HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
 
-        headers.set("Authorization", "Bearer " + fcmAccessToken);
+        Message message = getMessage(markerList);
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("message", message);
+        return new HttpEntity<>(requestBody, headers);
+    }
 
-        Map<String,Object> requestBody = new HashMap<>();
-        requestBody.put("message",message);
-
-        HttpEntity<Object> entity = new HttpEntity<>(requestBody,headers);
-
-        ResponseEntity<RECListResponse<InquireBillingStatementsResponseRestTemplateDto>> response
-                = restTemplate.exchange(
-                FCMURL, HttpMethod.POST, entity,
-                new ParameterizedTypeReference<>(){}
+    // FCM OAuth2 토큰 재발급 요청
+    private String refreshAccessToken() {
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+                "https://oauth2.googleapis.com/token",
+                new HttpEntity<>(Map.of(
+                        "grant_type", "refresh_token",
+                        "client_id", fcmClientId,
+                        "client_secret", fcmClientSecret,
+                        "refresh_token", fcmRefreshToken
+                )),
+                Map.class
         );
 
-        return;
+        Map<String, String> responseBody = (Map<String, String>) response.getBody();
+        return responseBody.get("access_token");
     }
 }

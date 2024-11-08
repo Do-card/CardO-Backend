@@ -75,5 +75,7 @@ management:
       enabled: true
 
 fcm:
-  access-token: ${FCM_ACCESS_TOKEN}
+  client-id: ${FCM_CLIENT_ID}
+  client-secret: ${FCM_CLIENT_SECRET}
+  refresh-token: ${FCM_REFRESH_TOKEN}
   token: ${FCM_TOKEN}
