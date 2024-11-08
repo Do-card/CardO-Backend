@@ -29,6 +29,7 @@ public class CardResponseDto {
     private String colorBackground;
     private String colorTitle;
     private Boolean isSelected;
+    private Boolean isRepresentativeSelected;
     private Long limitRemaining;
     private Long performanceRemaining;
     @Builder.Default
@@ -47,6 +48,7 @@ public class CardResponseDto {
         this.colorBackground = card.getColorBackground();
         this.colorTitle = card.getColorTitle();
         this.isSelected = card.getIsSelected();
+        this.isRepresentativeSelected = card.getIsRepresentativeSelected();
         this.limitRemaining = card.getLimitRemaining();
         this.performanceRemaining = card.getPerformanceRemaining();
         this.cardBenefits = new ArrayList<>();
