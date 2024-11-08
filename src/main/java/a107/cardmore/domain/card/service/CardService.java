@@ -1,5 +1,6 @@
 package a107.cardmore.domain.card.service;
 
+import a107.cardmore.domain.card.dto.CardRepresentativeRequestDto;
 import a107.cardmore.domain.card.dto.CardResponseDto;
 import a107.cardmore.domain.card.dto.CompanyCardListResponseDto;
 import a107.cardmore.domain.card.dto.SelectedInfo;
@@ -102,5 +103,27 @@ public class CardService {
                     Company company = companyModuleService.findUserCompany(myCard.getCardIssuerCode(), user);
                     cardModuleService.saveCard(company, myCard);
                 });
+    }
+
+    public void updateRepresentativeSelected(
+        List<CardRepresentativeRequestDto> cardRepresentativeRequestDtos, String userEmail) {
+        User user  = userModuleService.getUserByEmail(userEmail);
+        int cnt = 0; //대표카드 개수(2개 이상이면 예외처리)
+        for(CardRepresentativeRequestDto cardRepresentativeRequestDto : cardRepresentativeRequestDtos) {
+            if (cardRepresentativeRequestDto.isRepresentativeSelected()) {
+                cnt += 1;
+                if(cnt>1){
+                    throw new BadRequestException("대표 카드 요청이 2개 이상입니다.");
+                }
+            }
+        }
+        for(CardRepresentativeRequestDto cardRepresentativeRequestDto : cardRepresentativeRequestDtos){
+            Long id = cardRepresentativeRequestDto.getId();
+            Card card = cardModuleService.findCardById(id);
+            if(card.getCompany().getUser()!=user){
+                throw new BadRequestException("로그인한 사용자의 카드가 아닙니다.");
+            }
+            card.changeIsRepresentativeSelected(cardRepresentativeRequestDto.isRepresentativeSelected());
+        }
     }
 }

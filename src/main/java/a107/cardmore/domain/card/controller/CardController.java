@@ -1,5 +1,6 @@
 package a107.cardmore.domain.card.controller;
 
+import a107.cardmore.domain.card.dto.CardRepresentativeRequestDto;
 import a107.cardmore.domain.card.dto.CardResponseDto;
 import a107.cardmore.domain.card.dto.CompanyCardListResponseDto;
 import a107.cardmore.domain.card.dto.SelectedCompanyResponseDto;
@@ -51,6 +52,13 @@ public class CardController {
         return new BaseSuccessResponse<>(cardService.getUserAllCardInfo(userEmail));
     }
 
+    @PostMapping("/representative")
+    public BaseSuccessResponse<Void> updateUserRepresentativeCard(@RequestBody
+        List<CardRepresentativeRequestDto> cardRepresentativeRequestDtos){
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        cardService.updateRepresentativeSelected(cardRepresentativeRequestDtos, userEmail);
+        return new BaseSuccessResponse<>(null);
+    }
 
 
 
