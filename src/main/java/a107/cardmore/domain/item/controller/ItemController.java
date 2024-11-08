@@ -85,4 +85,5 @@ public class ItemController {
         return new BaseSuccessResponse<>(itemElasticService.getLocalTrends(poiId));
     }
 
+
 }

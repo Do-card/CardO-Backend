@@ -1,23 +1,16 @@
 package a107.cardmore.domain.card.entity;
 
 import a107.cardmore.domain.company.entity.Company;
-import a107.cardmore.domain.discount.entity.Discount;
 import a107.cardmore.util.base.BaseTimeEntity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -70,6 +63,10 @@ public class Card extends BaseTimeEntity {
 
     @Builder.Default
     @Column(nullable = false)
+    private Boolean isRepresentativeSelected = false;
+
+    @Builder.Default
+    @Column(nullable = false)
     private Boolean isSelected = false;
 
     @Builder.Default
@@ -82,5 +79,9 @@ public class Card extends BaseTimeEntity {
 
     public void changeLimitRemaining(Long limitRemaining) {
         this.limitRemaining = limitRemaining;
+    }
+
+    public void changeIsRepresentativeSelected(Boolean isRepresentativeSelected) {
+        this.isRepresentativeSelected = isRepresentativeSelected;
     }
 }
