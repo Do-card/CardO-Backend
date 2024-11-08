@@ -609,7 +609,7 @@ public class RestTemplateUtil {
         FCMData data = new FCMData();
         Notification notification = new Notification();
 
-        data.setUrl("https://k11a402.p.ssafy.io/tmap");
+        data.setUrl("https://k11a402.p.ssafy.io/map");
 
         notification.setTitle(markerList.getPoiName() + "에서 할 일이 있어요");
 
