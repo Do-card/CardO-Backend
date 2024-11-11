@@ -28,9 +28,10 @@ public interface MarkerRepository extends JpaRepository<Marker, Long> {
         FROM Marker m
         WHERE m.user = :user AND
               m.isFavorite = false AND
-              m.id > :lastId
+              (:lastId = 0 OR m.id < :lastId)
+        ORDER BY m.id DESC
     """)
-    Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdGreaterThan(
+    Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdSmallerThan(
             @Param("user") User user,
             @Param("lastId") Long lastId,
             Pageable pageable
@@ -42,10 +43,11 @@ public interface MarkerRepository extends JpaRepository<Marker, Long> {
         SELECT DISTINCT m
         FROM Marker m LEFT JOIN m.items i
         WHERE m.user = :user AND
-              m.id > :lastId AND
+              (:lastId = 0 OR m.id < :lastId) AND
               (i IS NULL OR i.name LIKE %:keyword%)
+        ORDER BY m.id DESC
     """)
-    Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdGreaterThanAndItemsNameContaining(
+    Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdSmallerThanAndItemsNameContaining(
             @Param("user") User user,
             @Param("lastId") Long lastId,
             @Param("keyword") String keyword,

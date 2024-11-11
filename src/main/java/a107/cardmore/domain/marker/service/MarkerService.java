@@ -1,6 +1,5 @@
 package a107.cardmore.domain.marker.service;
 
-import a107.cardmore.domain.item.service.ItemModuleService;
 import a107.cardmore.domain.marker.dto.MarkerCreateRequestDto;
 import a107.cardmore.domain.marker.dto.MarkerFavoriteUpdateRequestDto;
 import a107.cardmore.domain.marker.dto.MarkerLocationUpdateRequestDto;
@@ -47,14 +46,14 @@ public class MarkerService {
         Pageable pageable = PageRequest.of(
                 0,
                 limit,
-                Sort.by(Sort.Order.desc("isFavorite"), Sort.Order.asc("id"))
+                Sort.by(Sort.Order.desc("isFavorite"), Sort.Order.desc("id"))
         );
         Slice<Marker> markers;
 
         if (keyword == null || keyword.isEmpty()) {
-            markers = markerModuleService.findAllByUserAndIsFavoriteFalseAndIdGreaterThan(user, lastId, pageable);
+            markers = markerModuleService.findAllByUserAndIsFavoriteFalseAndIdSmallerThan(user, lastId, pageable);
         } else {
-            markers = markerModuleService.findAllByUserAndIsFavoriteFalseAndIdGreaterThanAndItemsNameContaining(user, keyword, lastId, pageable);
+            markers = markerModuleService.findAllByUserAndIsFavoriteFalseAndIdSmallerThanAndItemsNameContaining(user, keyword, lastId, pageable);
         }
         return markers.map(marker -> {
             MarkerResponseDto responseDto = markerMapper.toMarkerResponseDto(marker);

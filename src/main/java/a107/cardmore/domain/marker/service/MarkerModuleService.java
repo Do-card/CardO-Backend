@@ -51,13 +51,13 @@ public class MarkerModuleService {
     }
 
     // 즐겨찾기 안된 전체 마커 무한 스크롤 조회
-    public Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdGreaterThan(User user, Long lastId, Pageable pageable){
-        return markerRepository.findAllByUserAndIsFavoriteFalseAndIdGreaterThan(user, lastId, pageable);
+    public Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdSmallerThan(User user, Long lastId, Pageable pageable){
+        return markerRepository.findAllByUserAndIsFavoriteFalseAndIdSmallerThan(user, lastId, pageable);
     }
 
     // 전체 마커 무한 스크롤 검색 결과 조회
-    public Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdGreaterThanAndItemsNameContaining(User user, String keyword, Long lastId, Pageable pageable) {
-        Slice<Marker> markers = markerRepository.findAllByUserAndIsFavoriteFalseAndIdGreaterThanAndItemsNameContaining(user, lastId, keyword, pageable);
+    public Slice<Marker> findAllByUserAndIsFavoriteFalseAndIdSmallerThanAndItemsNameContaining(User user, String keyword, Long lastId, Pageable pageable) {
+        Slice<Marker> markers = markerRepository.findAllByUserAndIsFavoriteFalseAndIdSmallerThanAndItemsNameContaining(user, lastId, keyword, pageable);
         markers.forEach(marker -> marker.getItems().removeIf(item -> !item.getName().contains(keyword)));
         return markers;
     }
