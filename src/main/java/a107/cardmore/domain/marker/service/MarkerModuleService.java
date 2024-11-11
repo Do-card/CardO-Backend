@@ -30,7 +30,7 @@ public class MarkerModuleService {
         markerRepository.delete(marker);
     }
 
-    @CacheEvict(value = "nearbyMarkers", key = "#user.id", allEntries = true)
+    //@CacheEvict(value = "nearbyMarkers", key = "#user.id", allEntries = true)
     public Marker createMarker(User user, MarkerCreateRequestDto requestDto) {
         Marker marker = Marker.builder()
                 .user(user)
@@ -62,7 +62,7 @@ public class MarkerModuleService {
         return markers;
     }
 
-    @Cacheable(value = "nearbyMarkers", key = "#user.id")
+    //@Cacheable(value = "nearbyMarkers", key = "#user.id")
     public List<Marker> findByUserAndPoiIdNotNullAndHasIncompleteItems(User user){
         return markerRepository.findByUserAndPoiIdNotNullAndHasIncompleteItems(user);
     }

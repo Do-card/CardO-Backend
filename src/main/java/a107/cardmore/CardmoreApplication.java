@@ -11,7 +11,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @EnableAsync
-@EnableCaching
+//@EnableCaching
 @EnableJpaAuditing
 @SpringBootApplication
 @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
