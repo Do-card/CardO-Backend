@@ -24,12 +24,10 @@ public class MarkerModuleService {
 
     private final MarkerRepository markerRepository;
 
-    @CachePut(value = "marker", key = "#marker.id", condition = "#marker.id != null")
     public Marker saveMarker(Marker marker){
         return markerRepository.save(marker);
     }
 
-    @CacheEvict(value = "marker", key = "#marker.id")
     public void deleteMarker(Marker marker){
         markerRepository.delete(marker);
     }
@@ -44,7 +42,6 @@ public class MarkerModuleService {
         return saveMarker(marker);
     }
 
-    @Cacheable(value = "marker", key = "#markerId")
     public Marker findById(Long markerId){
         return markerRepository.findById(markerId)
                 .orElseThrow(() -> new BadRequestException("존재하지 않는 마커입니다."));
