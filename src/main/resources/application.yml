@@ -75,5 +75,6 @@ management:
       enabled: true
 
 fcm:
-  access-token: ${FCM_ACCESS_TOKEN}
+  private-key: ${FCM_PRIVATE_KEY}
+  client-email: ${FCM_CLIENT_EMAIL}
   token: ${FCM_TOKEN}
