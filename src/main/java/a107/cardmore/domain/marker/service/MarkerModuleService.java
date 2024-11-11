@@ -1,6 +1,5 @@
 package a107.cardmore.domain.marker.service;
 
-import a107.cardmore.domain.item.entity.Item;
 import a107.cardmore.domain.marker.dto.MarkerCreateRequestDto;
 import a107.cardmore.domain.marker.entity.Marker;
 import a107.cardmore.domain.marker.repository.MarkerRepository;
@@ -9,7 +8,6 @@ import a107.cardmore.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;

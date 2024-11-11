@@ -33,7 +33,6 @@ public class MarkerService {
     private final UserModuleService userModuleService;
     private final MarkerModuleService markerModuleService;
     private final MarkerMapper markerMapper;
-    private final ItemModuleService itemModuleService;
 
     public List<MarkerResponseDto> getAllFavoriteMarkers(String email){
         User user = userModuleService.getUserByEmail(email);
@@ -48,7 +47,7 @@ public class MarkerService {
         Pageable pageable = PageRequest.of(
                 0,
                 limit,
-                Sort.by(Sort.Order.desc("isFavorite"), Sort.Order.asc("id"))
+                Sort.by(Sort.Order.desc("isFavorite"), Sort.Order.desc("id"))
         );
         Slice<Marker> markers;
 
