@@ -3,7 +3,6 @@ package a107.cardmore.domain.fcm.repository;
 import a107.cardmore.domain.fcm.entity.FCM;
 import a107.cardmore.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 

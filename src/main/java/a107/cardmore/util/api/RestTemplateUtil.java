@@ -1,7 +1,6 @@
 package a107.cardmore.util.api;
 
 import a107.cardmore.domain.fcm.entity.FCM;
-import a107.cardmore.domain.fcm.repository.FCMRepository;
 import a107.cardmore.domain.fcm.service.FCMModuleService;
 import a107.cardmore.domain.fcm.service.FCMService;
 import a107.cardmore.domain.marker.dto.MarkerResponseDto;
