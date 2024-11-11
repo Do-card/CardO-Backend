@@ -26,14 +26,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
@@ -614,14 +611,12 @@ public class RestTemplateUtil {
     public void FCMPushMessage(MarkerResponseDto markerList){
         final String FCMURL = "https://fcm.googleapis.com/v1/projects/card-o-ba82e/messages:send";
 
-
         String fcmAccessToken = fcmAccessTokenRedisRepository.getAccessToken();
         if (fcmAccessToken == null){
             fcmAccessToken = refreshAccessToken();
         }
 
         try {
-//            ResponseEntity<RECListResponse<InquireBillingStatementsResponseRestTemplateDto>> response =
             restTemplate.exchange(
                     FCMURL,
                     HttpMethod.POST,
@@ -634,6 +629,19 @@ public class RestTemplateUtil {
                 String newAccessToken = refreshAccessToken();
                 fcmAccessTokenRedisRepository.saveAccessToken(newAccessToken);
 
+                // 재시도
+                restTemplate.exchange(
+                        FCMURL,
+                        HttpMethod.POST,
+                        getEntity(markerList, newAccessToken),
+                        new ParameterizedTypeReference<>() {}
+                );
+            }
+            throw e;
+        }
+    }
+
+    private Message getMessage(MarkerResponseDto markerList) {
         Message message = new Message();
         FCMData data = new FCMData();
         Notification notification = new Notification();
@@ -693,13 +701,13 @@ public class RestTemplateUtil {
             PrivateKey privateKey = java.security.KeyFactory.getInstance("RSA").generatePrivate(keySpec);
 
             return Jwts.builder()
-                    .setIssuer(clientEmail)
-                    .setSubject(clientEmail)
-                    .setAudience("https://oauth2.googleapis.com/token")
-                    .setIssuedAt(new Date(now))
-                    .setExpiration(expirationTime)
+                    .issuer(clientEmail)
+                    .subject(clientEmail)
+                    .audience().add("https://oauth2.googleapis.com/token").and()
+                    .issuedAt(new Date(now))
+                    .expiration(expirationTime)
                     .claim("scope", "https://www.googleapis.com/auth/firebase.messaging")
-                    .signWith(privateKey, SignatureAlgorithm.RS256)
+                    .signWith(privateKey, Jwts.SIG.RS256)
                     .compact();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException ignored){
             throw new BadRequestException("FCM Access토큰 발급에 실패했습니다.");
