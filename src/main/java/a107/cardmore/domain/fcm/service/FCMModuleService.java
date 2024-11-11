@@ -2,9 +2,13 @@ package a107.cardmore.domain.fcm.service;
 
 import a107.cardmore.domain.fcm.entity.FCM;
 import a107.cardmore.domain.fcm.repository.FCMRepository;
+import a107.cardmore.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 
 @Service
@@ -18,5 +22,10 @@ public class FCMModuleService {
         if(fcmRepository.findByToken(fcm.getToken()) == null) {
             fcmRepository.save(fcm);
         }
+    }
+
+    @Transactional
+    public void deleteToken(User user, List<String> tokens){
+        fcmRepository.deleteByUserAndTokenIn(user, tokens);
     }
 }

@@ -1,7 +1,13 @@
 package a107.cardmore.util.api;
 
+import a107.cardmore.domain.fcm.entity.FCM;
+import a107.cardmore.domain.fcm.repository.FCMRepository;
+import a107.cardmore.domain.fcm.service.FCMModuleService;
+import a107.cardmore.domain.fcm.service.FCMService;
 import a107.cardmore.domain.marker.dto.MarkerResponseDto;
 import a107.cardmore.domain.redis.FcmAccessTokenRedisRepository;
+import a107.cardmore.domain.user.entity.User;
+import a107.cardmore.domain.user.service.UserModuleService;
 import a107.cardmore.global.exception.BadRequestException;
 import a107.cardmore.util.api.dto.FCM.FCMData;
 import a107.cardmore.util.api.dto.FCM.Message;
@@ -21,11 +27,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -44,8 +52,10 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class RestTemplateUtil {
 
+    private final FCMService fcmService;
+    private final FCMModuleService fcmModuleService;
+    private final UserModuleService userModuleService;
     private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
     private final FcmAccessTokenRedisRepository fcmAccessTokenRedisRepository;
 
     @Value("${fintech.api.url}")
@@ -61,8 +71,8 @@ public class RestTemplateUtil {
     private String fcmPrivateKey;
     @Value("${fcm.client-email}")
     private String fcmClientEmail;
-    @Value("${fcm.token}")
-    private String fcmToken;
+//    @Value("${fcm.token}")
+//    private String fcmToken;
 
     //정수형 UUID 생성
     private static String generateNumericUUID() {
@@ -608,39 +618,74 @@ public class RestTemplateUtil {
 
     //Firebase
     public void FCMPushMessage(MarkerResponseDto markerList){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userModuleService.getUserByEmail(email);
         final String FCMURL = "https://fcm.googleapis.com/v1/projects/card-o-ba82e/messages:send";
 
+        List<FCM> fcmTokens = fcmService.getFCMList(user);
+        List<String> disabledFcmTokens = new ArrayList<>();
         String fcmAccessToken = fcmAccessTokenRedisRepository.getAccessToken();
         if (fcmAccessToken == null){
             fcmAccessToken = refreshAccessToken();
+            fcmAccessTokenRedisRepository.saveAccessToken(fcmAccessToken);
+            log.info("accessToken 발급: {}", fcmAccessToken);
         }
 
-        try {
-            restTemplate.exchange(
-                    FCMURL,
-                    HttpMethod.POST,
-                    getEntity(markerList, fcmAccessToken),
-                    new ParameterizedTypeReference<>() {}
-            );
-        } catch (HttpClientErrorException e){
-            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-                // Access Token 만료 -> Refresh Token으로 재발급
-                String newAccessToken = refreshAccessToken();
-                fcmAccessTokenRedisRepository.saveAccessToken(newAccessToken);
-
-                // 재시도
-                restTemplate.exchange(
+        for (FCM fcmToken : fcmTokens) {
+            try {
+                ResponseEntity<?> response = restTemplate.exchange(
                         FCMURL,
                         HttpMethod.POST,
-                        getEntity(markerList, newAccessToken),
-                        new ParameterizedTypeReference<>() {}
+                        getEntity(markerList, fcmAccessToken, fcmToken),
+                        new ParameterizedTypeReference<>() {
+                        }
                 );
+                log.info("fcm 메세지 전송 성공: {}", response.getBody());
+            } catch (HttpClientErrorException e) {
+                if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                    // Access Token 만료 -> Refresh Token으로 재발급
+                    String newAccessToken = refreshAccessToken();
+                    fcmAccessTokenRedisRepository.saveAccessToken(newAccessToken);
+                    log.info("accessToken 재발급");
+
+                    // 재시도
+                    ResponseEntity<?> response = restTemplate.exchange(
+                            FCMURL,
+                            HttpMethod.POST,
+                            getEntity(markerList, newAccessToken, fcmToken),
+                            new ParameterizedTypeReference<>() {}
+                    );
+                    log.info("fcm 메세지 전송 성공: {}", response.getBody());
+                } else if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                    log.warn("유효하지 않은 FCM 토큰입니다: {}", fcmToken);
+                    disabledFcmTokens.add(fcmToken.getToken());
+                } else {
+                    log.error("FCM 메세지 전송 실패: {}", e.getMessage());
+                }
             }
-            throw e;
         }
+        disableOrDeleteToken(user, disabledFcmTokens);
     }
 
-    private Message getMessage(MarkerResponseDto markerList) {
+    private void disableOrDeleteToken(User user, List<String> disabledFcmToken){
+        if (disabledFcmToken.isEmpty()){
+            return;
+        }
+        fcmModuleService.deleteToken(user, disabledFcmToken);
+        log.info("만료된 FCM 토큰 삭제: {}", disabledFcmToken);
+    }
+
+    private HttpEntity<Object> getEntity(MarkerResponseDto markerList, String accessToken, FCM fcmToken){
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+
+        Message message = getMessage(markerList, fcmToken);
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("message", message);
+        return new HttpEntity<>(requestBody, headers);
+    }
+
+    private Message getMessage(MarkerResponseDto markerList, FCM fcmToken) {
         Message message = new Message();
         FCMData data = new FCMData();
         Notification notification = new Notification();
@@ -655,33 +700,25 @@ public class RestTemplateUtil {
             notification.setBody("아직 " + markerList.getPoiName() + "에서 추가된 할 일이 없어요");
         }
 
-        message.setToken(fcmToken);
+        message.setToken(fcmToken.getToken());
         message.setNotification(notification);
         message.setData(data);
         return message;
-    }
-
-    private HttpEntity<Object> getEntity(MarkerResponseDto markerList, String accessToken){
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + accessToken);
-
-        Message message = getMessage(markerList);
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("message", message);
-        return new HttpEntity<>(requestBody, headers);
     }
 
     // FCM OAuth2 토큰 재발급 요청
     private String refreshAccessToken(){
         String jwt = createJwt(fcmClientEmail, fcmPrivateKey);
 
+        log.info("jwt: \n{}", jwt);
+        Map<String, String> requestBody = Map.of(
+                "grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer",
+                "assertion", jwt
+        );
         // JWT를 이용한 Access Token 발급 요청
         JsonNode response = restTemplate.postForObject(
                 "https://oauth2.googleapis.com/token",
-                Map.of(
-                        "grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer",
-                        "assertion", jwt
-                ),
+                new HttpEntity<>(requestBody),
                 JsonNode.class
         );
         return response.get("access_token").asText();
@@ -692,9 +729,10 @@ public class RestTemplateUtil {
             long now = System.currentTimeMillis();
             Date expirationTime = new Date(now + TimeUnit.HOURS.toMillis(1));
 
-            String privateKeyContent = privateKeyPem.replaceAll("\\n", "")
+            String privateKeyContent = privateKeyPem.replaceAll("\\\\n", "")
                     .replace("-----BEGIN PRIVATE KEY-----", "")
                     .replace("-----END PRIVATE KEY-----", "");
+            log.info("private key: \n{}", privateKeyContent);
             byte[] keyBytes = Base64.getDecoder().decode(privateKeyContent);
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
             PrivateKey privateKey = java.security.KeyFactory.getInstance("RSA").generatePrivate(keySpec);
@@ -702,11 +740,11 @@ public class RestTemplateUtil {
             return Jwts.builder()
                     .issuer(clientEmail)
                     .subject(clientEmail)
-                    .audience().add("https://oauth2.googleapis.com/token").and()
+                    .setAudience("https://oauth2.googleapis.com/token")
                     .issuedAt(new Date(now))
                     .expiration(expirationTime)
                     .claim("scope", "https://www.googleapis.com/auth/firebase.messaging")
-                    .signWith(privateKey, Jwts.SIG.RS256)
+                    .signWith(privateKey, SignatureAlgorithm.RS256)
                     .compact();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException ignored){
             throw new BadRequestException("FCM Access토큰 발급에 실패했습니다.");
