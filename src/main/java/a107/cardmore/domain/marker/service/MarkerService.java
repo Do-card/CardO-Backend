@@ -47,7 +47,7 @@ public class MarkerService {
         Pageable pageable = PageRequest.of(
                 0,
                 limit,
-                Sort.by(Sort.Order.desc("isFavorite"), Sort.Order.desc("id"))
+                Sort.by(Sort.Order.desc("isFavorite"), Sort.Order.asc("id"))
         );
         Slice<Marker> markers;
 
