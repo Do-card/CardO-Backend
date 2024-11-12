@@ -112,7 +112,7 @@ public class MarkerService {
 
     //TODO: Redis 캐싱 로직 추가, FCM 알림 추가
     public List<MarkerResponseDto> getNearbyMarkers(String email, MarkerNearbyRequestDto markerNearbyRequestDto) {
-        final int NEARBY_DISTANCE = 100; // 알림 보낼 거리 기준 거리
+        final int NEARBY_DISTANCE = 500; // 알림 보낼 거리 기준 거리
         User user = userModuleService.getUserByEmail(email);
         List<Marker> userMarkers = markerModuleService.findByUserAndPoiIdNotNullAndHasIncompleteItems(user);
         List<MarkerResponseDto> nearbyMarkers = new ArrayList<>();
