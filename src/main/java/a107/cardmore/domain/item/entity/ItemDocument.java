@@ -22,6 +22,9 @@ public class ItemDocument {
     @Field(type = Text)
     private String category;
 
+    @Field(type = Text)
+    private String majorCategory;
+
     @Field(type=Text)
     private String poiId;
 
