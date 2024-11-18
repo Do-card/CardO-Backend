@@ -48,10 +48,18 @@ public class UserService {
         User user = userModuleService.getUserByEmail(email);
         log.info("토큰 : {}", token);
 
-        FCM fcmToken = FCM.builder()
-                .token(token)
-                .user(user)
-                .build();
+        FCM fcmToken = fcmModuleService.findByUser(user);
+
+        if (fcmToken == null) {
+            fcmToken = FCM.builder()
+                    .user(user)
+                    .token(token)
+                    .build();
+        } else {
+            fcmToken = fcmToken.toBuilder()
+                    .token(token)
+                    .build();
+        }
 
         fcmModuleService.saveToken(fcmToken);
     }

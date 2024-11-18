@@ -17,6 +17,15 @@ import java.util.List;
 public class FCMModuleService {
     private final FCMRepository fcmRepository;
 
+    public FCM findByUser(User user){
+        List<FCM> fcms = fcmRepository.findAllByUserId(user.getId());
+
+        if (fcms.isEmpty()){
+            return null;
+        }
+        return fcms.get(0);
+    }
+
     public void saveToken(FCM fcm){
         //TODO 다른 유저 아이디로 이미 등록된 토큰인 경우 예외 처리
         if(fcmRepository.findByToken(fcm.getToken()) == null) {

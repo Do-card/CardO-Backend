@@ -454,7 +454,6 @@ public class RestTemplateUtil {
     //내 카드 목록 조회
     public List<CardResponseRestTemplateDto> inquireSignUpCreditCardList(String userKey) {
         log.info("내 카드 목록 API");
-        log.info("userKey->{}",userKey);
 
         String uri = "edu/creditCard/inquireSignUpCreditCardList";
 
@@ -632,12 +631,13 @@ public class RestTemplateUtil {
 
         for (FCM fcmToken : fcmTokens) {
             try {
-                if (fcmCacheRepository.hasHistory(fcmToken)){
-                    log.info("fcm 메세지 전송 대기시간");
+                if (fcmCacheRepository.hasHistory(fcmToken, markerList)){
+                    log.info("fcm 메세지 전송 대기상태");
                     return;
                 }
 
-                fcmCacheRepository.saveHistory(fcmToken);
+                fcmCacheRepository.saveHistory(fcmToken, markerList);
+                log.info("fcm 메세지 전송 시작 token: {}", fcmToken.getToken());
                 ResponseEntity<?> response = restTemplate.exchange(
                         FCMURL,
                         HttpMethod.POST,
@@ -654,14 +654,14 @@ public class RestTemplateUtil {
                     log.info("accessToken 재발급");
 
                     // 재시도
-                    fcmCacheRepository.saveHistory(fcmToken);
+                    fcmCacheRepository.saveHistory(fcmToken, markerList);
                     ResponseEntity<?> response = restTemplate.exchange(
                             FCMURL,
                             HttpMethod.POST,
                             getEntity(markerList, newAccessToken, fcmToken),
                             new ParameterizedTypeReference<>() {}
                     );
-                    log.info("fcm 메세지 전송 성공: {}", response.getBody());
+                    log.info("fcm 메세지 재전송 성공: {}", response.getBody());
                 } else if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                     log.warn("유효하지 않은 FCM 토큰입니다: {}", fcmToken);
                     disabledFcmTokens.add(fcmToken.getToken());
@@ -716,7 +716,6 @@ public class RestTemplateUtil {
     private String refreshAccessToken(){
         String jwt = createJwt(fcmClientEmail, fcmPrivateKey);
 
-        log.info("jwt: \n{}", jwt);
         Map<String, String> requestBody = Map.of(
                 "grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer",
                 "assertion", jwt
@@ -735,10 +734,10 @@ public class RestTemplateUtil {
             long now = System.currentTimeMillis();
             Date expirationTime = new Date(now + TimeUnit.HOURS.toMillis(1));
 
-            String privateKeyContent = privateKeyPem.replaceAll("\\\\n", "")
+            String privateKeyContent = privateKeyPem.replace("\n", "")
                     .replace("-----BEGIN PRIVATE KEY-----", "")
                     .replace("-----END PRIVATE KEY-----", "");
-            log.info("private key: \n{}", privateKeyContent);
+
             byte[] keyBytes = Base64.getDecoder().decode(privateKeyContent);
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
             PrivateKey privateKey = java.security.KeyFactory.getInstance("RSA").generatePrivate(keySpec);

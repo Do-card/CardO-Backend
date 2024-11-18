@@ -1,6 +1,7 @@
 package a107.cardmore.domain.redis;
 
 import a107.cardmore.domain.fcm.entity.FCM;
+import a107.cardmore.domain.marker.dto.MarkerResponseDto;
 import a107.cardmore.global.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,12 +21,12 @@ public class FcmCacheRepository extends BaseRedisRepository<String> {
         this.defaultTtl = 60 * 5; // 5분
     }
 
-    public void saveHistory(FCM token){
-        save(generateKeyFromId(token.getToken()), new Date().toString());
+    public void saveHistory(FCM token, MarkerResponseDto marker){
+        save(token.getToken()+":"+marker.getPoiId(), new Date().toString());
     }
 
-    public Boolean hasHistory(FCM token){
-        Boolean hasKey = redisTemplate.hasKey(generateKeyFromId(token.getToken()));
+    public Boolean hasHistory(FCM token, MarkerResponseDto marker){
+        Boolean hasKey = redisTemplate.hasKey(generateKeyFromId(token.getToken()+":"+marker.getPoiId()));
 
         if (hasKey == null){
             throw new BadRequestException("Token not found");
