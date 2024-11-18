@@ -72,8 +72,6 @@ public class RestTemplateUtil {
     private String fcmPrivateKey;
     @Value("${fcm.client-email}")
     private String fcmClientEmail;
-//    @Value("${fcm.token}")
-//    private String fcmToken;
 
     //정수형 UUID 생성
     private static String generateNumericUUID() {
