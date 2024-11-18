@@ -5,6 +5,7 @@ import a107.cardmore.domain.fcm.service.FCMModuleService;
 import a107.cardmore.domain.fcm.service.FCMService;
 import a107.cardmore.domain.marker.dto.MarkerResponseDto;
 import a107.cardmore.domain.redis.FcmAccessTokenRedisRepository;
+import a107.cardmore.domain.redis.FcmCacheRepository;
 import a107.cardmore.domain.user.entity.User;
 import a107.cardmore.domain.user.service.UserModuleService;
 import a107.cardmore.global.exception.BadRequestException;
@@ -56,6 +57,7 @@ public class RestTemplateUtil {
     private final UserModuleService userModuleService;
     private final RestTemplate restTemplate;
     private final FcmAccessTokenRedisRepository fcmAccessTokenRedisRepository;
+    private final FcmCacheRepository fcmCacheRepository;
 
     @Value("${fintech.api.url}")
     private String url;
@@ -632,6 +634,12 @@ public class RestTemplateUtil {
 
         for (FCM fcmToken : fcmTokens) {
             try {
+                if (fcmCacheRepository.hasHistory(fcmToken)){
+                    log.info("fcm 메세지 전송 대기시간");
+                    return;
+                }
+
+                fcmCacheRepository.saveHistory(fcmToken);
                 ResponseEntity<?> response = restTemplate.exchange(
                         FCMURL,
                         HttpMethod.POST,
@@ -648,6 +656,7 @@ public class RestTemplateUtil {
                     log.info("accessToken 재발급");
 
                     // 재시도
+                    fcmCacheRepository.saveHistory(fcmToken);
                     ResponseEntity<?> response = restTemplate.exchange(
                             FCMURL,
                             HttpMethod.POST,
