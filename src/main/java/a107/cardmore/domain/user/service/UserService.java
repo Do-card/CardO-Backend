@@ -39,7 +39,7 @@ public class UserService {
         List<MarkerResponseDto> markerList =  markerService.getNearbyMarkers(email,markerDto);
 
         for(MarkerResponseDto markerResponseDto : markerList) {
-            log.info("가까운 마커: {}", markerResponseDto);
+            log.info("가까운 마커 id: {}, 이름: {}, 위도: {}, 경도: {}", markerResponseDto.getId(), markerResponseDto.getName(), markerResponseDto.getLatitude(), markerResponseDto.getLongitude());
             restTemplateUtil.FCMPushMessage(markerResponseDto);
         }
     }
