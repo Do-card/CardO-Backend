@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: cardmore
+  jackson:
+    time-zone: Asia/Seoul
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 1000
+        jdbc:
+          time_zone: Asia/Seoul
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+  data:
+    elasticsearch:
+      url: ${ELASTICSEARCH_URL}:${ELASTICSEARCH_PORT}
+      repositories:
+        enabled: true
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+    data:
+      elasticsearch:
+        client:
+          config:
+            uris: http://localhost:9200
+
+ai:
+  url: ${AI_URL}
+
+jwt:
+  secret-key: ${SECRET_KEY}
+  access-token-exp: ${ACCESS_TOKEN_EXP}
+  refresh-token-exp: ${REFRESH_TOKEN_EXP}
+
+fintech:
+  api:
+    url: ${FINTECH_API_URL}
+    key: ${FINTECH_API_KEY}
+  app:
+    no: ${FINTECH_API_NO}
+  institution:
+    code: ${FINTECH_INSTITUTION_CODE}
+
+springdoc:
+  default-consumes-media-type: application/json;charset=UTF-8
+  api-docs:
+    enabled: true
+    path: '/docs'
+  swagger-ui:
+    enabled: true
+    path: '/swagger'
+    try-it-out-enabled: true
+    operations-sorter: alpha
+
+logging:
+  level:
+    a107.cardmore: debug
+    org.springframework.data.elasticsearch.client: DEBUG
+    org.elasticsearch.client: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+
+fcm:
+  private-key: ${FCM_PRIVATE_KEY}
+  client-email: ${FCM_CLIENT_EMAIL}
+  token: ${FCM_TOKEN}
